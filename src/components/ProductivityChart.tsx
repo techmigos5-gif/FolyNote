@@ -113,8 +113,8 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
     if (active && payload && payload.length) {
       const data = payload[0].payload as ChartDayData;
       return (
-        <div className="bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-purple-100 text-xs space-y-1.5 min-w-[170px]">
-          <p className="font-bold text-gray-900 border-b border-gray-100 pb-1">
+        <div className="bg-white/95 dark:bg-[#221a30] backdrop-blur-md p-3 rounded-xl shadow-lg border border-accent-100 text-xs space-y-1.5 min-w-[170px]">
+          <p className="font-bold text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 pb-1">
             {data.fullDate}
           </p>
           <div className="flex items-center justify-between text-amber-700 font-medium">
@@ -124,14 +124,14 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
             </span>
             <span className="font-bold">{data.thoughtsCount}</span>
           </div>
-          <div className="flex items-center justify-between text-purple-700 font-medium">
+          <div className="flex items-center justify-between text-accent-700 font-medium">
             <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-purple-500" />
+              <span className="w-2 h-2 rounded-full bg-accent-500" />
               Ideas Sparked:
             </span>
             <span className="font-bold">{data.ideasCount}</span>
           </div>
-          <div className="flex items-center justify-between text-gray-800 font-bold pt-1 border-t border-gray-100">
+          <div className="flex items-center justify-between text-gray-800 dark:text-gray-200 font-bold pt-1 border-t border-gray-100 dark:border-gray-800">
             <span>Total Activity:</span>
             <span>{data.total}</span>
           </div>
@@ -144,17 +144,17 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
   return (
     <div
       id="dashboard-productivity-chart-card"
-      className="p-4 sm:p-6 rounded-2xl bg-white border border-purple-100/70 shadow-xs space-y-4 w-full min-w-0 overflow-hidden"
+      className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#221a30] border border-accent-100/70 shadow-xs space-y-4 w-full min-w-0 overflow-hidden"
     >
       {/* Chart Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-50">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-accent-50 text-accent-700 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                 Productivity Trend
               </h3>
               <p className="text-xs text-gray-500">
@@ -170,11 +170,11 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
             <BookOpen className="w-3 h-3 text-amber-600" />
             <span>{totalThoughts} thoughts</span>
           </div>
-          <div className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-900 border border-purple-200/60 font-semibold flex items-center gap-1.5">
-            <Lightbulb className="w-3 h-3 text-purple-600" />
+          <div className="px-2.5 py-1 rounded-lg bg-accent-50 text-accent-900 border border-accent-200/60 font-semibold flex items-center gap-1.5">
+            <Lightbulb className="w-3 h-3 text-accent-600" />
             <span>{totalIdeas} ideas</span>
           </div>
-          <div className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 font-semibold">
+          <div className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-semibold">
             <span>{totalActivity} total this week</span>
           </div>
         </div>
@@ -191,18 +191,18 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="#F3EEF9"
+              stroke="var(--chart-grid)"
             />
             <XAxis
               dataKey="dayName"
-              stroke="#9CA3AF"
+              stroke="var(--chart-tick)"
               fontSize={11}
               tickLine={false}
-              axisLine={{ stroke: '#E5E7EB' }}
+              axisLine={{ stroke: 'var(--chart-axis)' }}
             />
             <YAxis
               allowDecimals={false}
-              stroke="#9CA3AF"
+              stroke="var(--chart-tick)"
               fontSize={11}
               tickLine={false}
               axisLine={false}
@@ -227,7 +227,7 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
             <Bar
               dataKey="ideasCount"
               name="Ideas"
-              fill="#8B5CF6"
+              fill="var(--accent-500)"
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
@@ -237,9 +237,9 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
 
       {/* Encouraging prompt when user starts fresh */}
       {totalActivity === 0 && (
-        <div className="p-3.5 rounded-xl bg-purple-50/50 border border-dashed border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-xl bg-accent-50/50 border border-dashed border-accent-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-gray-600">
-            <Sparkles className="w-4 h-4 text-purple-600 shrink-0" />
+            <Sparkles className="w-4 h-4 text-accent-600 shrink-0" />
             <span>
               Your real workspace is ready! Log thoughts and capture ideas to start your 7-day productivity streak.
             </span>
@@ -257,7 +257,7 @@ export const ProductivityChart: React.FC<ProductivityChartProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('ideas')}
-                className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition cursor-pointer flex items-center gap-1 shadow-xs"
+                className="px-3 py-1.5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white font-semibold transition cursor-pointer flex items-center gap-1 shadow-xs"
               >
                 <Plus className="w-3 h-3" />
                 <span>Capture Idea</span>

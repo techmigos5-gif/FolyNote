@@ -66,13 +66,13 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-3xl shadow-2xl border border-purple-100 flex flex-col overflow-hidden text-gray-900"
+        className="relative w-full max-w-3xl max-h-[90vh] bg-white dark:bg-[#221a30] rounded-3xl shadow-2xl border border-accent-100 flex flex-col overflow-hidden text-gray-900 dark:text-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 sm:px-7 py-4.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-purple-50/80 via-white to-pink-50/60 shrink-0">
+        <div className="px-5 sm:px-7 py-4.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-accent-50/80 via-white to-pink-50/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-600/20 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-accent-600 text-white flex items-center justify-center shadow-md shadow-accent-600/20 shrink-0">
               <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
@@ -100,14 +100,14 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
         </div>
 
         {/* Navigation Tabs (Fully responsive overflow) */}
-        <div className="flex items-center gap-1.5 px-4 sm:px-7 py-2.5 bg-gray-50/80 border-b border-gray-100 overflow-x-auto shrink-0 text-xs font-semibold">
+        <div className="flex items-center gap-1.5 px-4 sm:px-7 py-2.5 bg-gray-50/80 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-800 overflow-x-auto shrink-0 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('dpdp')}
             className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'dpdp'
-                ? 'bg-purple-600 text-white shadow-xs font-bold'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-accent-600 text-white shadow-xs font-bold'
+                : 'text-gray-600 hover:text-accent-700 hover:bg-accent-50'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -119,8 +119,8 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
             onClick={() => setActiveTab('privacy')}
             className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'privacy'
-                ? 'bg-purple-600 text-white shadow-xs font-bold'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-accent-600 text-white shadow-xs font-bold'
+                : 'text-gray-600 hover:text-accent-700 hover:bg-accent-50'
             }`}
           >
             <Lock className="w-3.5 h-3.5" />
@@ -132,8 +132,8 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
             onClick={() => setActiveTab('terms')}
             className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'terms'
-                ? 'bg-purple-600 text-white shadow-xs font-bold'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-accent-600 text-white shadow-xs font-bold'
+                : 'text-gray-600 hover:text-accent-700 hover:bg-accent-50'
             }`}
           >
             <Scale className="w-3.5 h-3.5" />
@@ -145,8 +145,8 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
             onClick={() => setActiveTab('security')}
             className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'security'
-                ? 'bg-purple-600 text-white shadow-xs font-bold'
-                : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-accent-600 text-white shadow-xs font-bold'
+                : 'text-gray-600 hover:text-accent-700 hover:bg-accent-50'
             }`}
           >
             <HardDrive className="w-3.5 h-3.5" />
@@ -155,7 +155,7 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
         </div>
 
         {/* Tab Body */}
-        <div className="p-5 sm:p-7 overflow-y-auto space-y-6 text-xs sm:text-sm text-gray-700 leading-relaxed">
+        <div className="p-5 sm:p-7 overflow-y-auto space-y-6 text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
           
           {/* TAB 1: DPDP ACT 2023 COMPLIANCE */}
           {activeTab === 'dpdp' && (
@@ -188,8 +188,8 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
 
               {/* Data Principal Rights Section */}
               <div className="space-y-3">
-                <h4 className="text-sm sm:text-base font-bold text-gray-900 flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-purple-600" />
+                <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-accent-600" />
                   <span>Your Rights as a Data Principal (Sections 11–14)</span>
                 </h4>
                 <p className="text-xs text-gray-600">
@@ -197,9 +197,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-1">
-                    <span className="font-bold text-xs text-purple-950 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                  <div className="p-3.5 rounded-2xl bg-accent-50/50 border border-accent-100 space-y-1">
+                    <span className="font-bold text-xs text-accent-950 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-600" />
                       1. Right to Access (Section 11)
                     </span>
                     <p className="text-[11px] text-gray-600">
@@ -207,9 +207,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-1">
-                    <span className="font-bold text-xs text-purple-950 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                  <div className="p-3.5 rounded-2xl bg-accent-50/50 border border-accent-100 space-y-1">
+                    <span className="font-bold text-xs text-accent-950 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-600" />
                       2. Right to Correction &amp; Erasure (Section 12)
                     </span>
                     <p className="text-[11px] text-gray-600">
@@ -217,9 +217,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-1">
-                    <span className="font-bold text-xs text-purple-950 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                  <div className="p-3.5 rounded-2xl bg-accent-50/50 border border-accent-100 space-y-1">
+                    <span className="font-bold text-xs text-accent-950 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-600" />
                       3. Right of Grievance Redressal (Section 13)
                     </span>
                     <p className="text-[11px] text-gray-600">
@@ -227,9 +227,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-1">
-                    <span className="font-bold text-xs text-purple-950 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                  <div className="p-3.5 rounded-2xl bg-accent-50/50 border border-accent-100 space-y-1">
+                    <span className="font-bold text-xs text-accent-950 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-600" />
                       4. Right to Nominate (Section 14)
                     </span>
                     <p className="text-[11px] text-gray-600">
@@ -241,14 +241,14 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
 
               {/* Lawful Grounds & Purpose Limitation */}
               <div className="space-y-2.5">
-                <h4 className="text-sm font-bold text-gray-900">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
                   Notice, Lawful Grounds &amp; Purpose Limitation (Section 5 &amp; 6)
                 </h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   Personal data (mobile number, display name, PIN, and self-authored thoughts) is processed solely and exclusively to provide the personalized sanctuary workspace requested by you. We do not engage in cross-site tracking, behavioral profiling, or advertising analytics.
                 </p>
-                <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 text-xs space-y-1">
-                  <div className="font-semibold text-gray-800">Summary of Processing Notice:</div>
+                <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 text-xs space-y-1">
+                  <div className="font-semibold text-gray-800 dark:text-gray-200">Summary of Processing Notice:</div>
                   <ul className="list-disc list-inside text-[11px] text-gray-600 space-y-0.5">
                     <li>Data collected: Mobile number for authentication, personal name, 6-digit access PIN, personal thoughts, documents, and ideas.</li>
                     <li>Specific purpose: Private storage, retrieval, offline caching, and display within your personal workspace.</li>
@@ -258,9 +258,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
               </div>
 
               {/* Grievance Officer Details */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-xs text-purple-900">
-                  <Mail className="w-4 h-4 text-purple-600" />
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-accent-50 to-pink-50 border border-accent-100 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-xs text-accent-900">
+                  <Mail className="w-4 h-4 text-accent-600" />
                   <span>Data Protection Officer &amp; Grievance Redressal</span>
                 </div>
                 <p className="text-[11px] text-gray-600">
@@ -268,13 +268,13 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                 </p>
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <div className="text-xs">
-                    <span className="font-semibold text-gray-900">Grievance Officer:</span> Vinay Sagar (Data Governance Cell)<br />
-                    <span className="font-semibold text-gray-900">Email:</span> grievance@folynote.app
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Grievance Officer:</span> Vinay Sagar (Data Governance Cell)<br />
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Email:</span> grievance@folynote.app
                   </div>
                   <button
                     type="button"
                     onClick={handleCopyEmail}
-                    className="px-3 py-1.5 rounded-lg bg-white border border-purple-200 hover:bg-purple-100 text-purple-800 text-xs font-semibold transition cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#221a30] border border-accent-200 hover:bg-accent-100 text-accent-800 text-xs font-semibold transition cursor-pointer"
                   >
                     {copySuccess ? 'Copied Email!' : 'Copy Officer Email'}
                   </button>
@@ -287,12 +287,12 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
           {activeTab === 'privacy' && (
             <div className="space-y-6 animate-in fade-in duration-150">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Privacy Policy</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Privacy Policy</h3>
                 <p className="text-xs text-gray-500 mt-0.5">Last updated: September 2026 &bull; Effective immediately</p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">1. Information We Collect</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">1. Information We Collect</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   We adhere to the strict principle of data minimization:
                 </p>
@@ -305,14 +305,14 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">2. How Your Data Is Processed &amp; Stored</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">2. How Your Data Is Processed &amp; Stored</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Your data resides in a secure, sandboxed environment. When offline or using PWA mode, documents and reflections are cached directly on your device storage via encrypted LocalStorage and CacheStorage. When connected, the workspace syncs with our dedicated server storage (<code className="text-purple-700 bg-purple-50 px-1 py-0.5 rounded">data/db.json</code>) without any third-party intermediate analytics.
+                  Your data resides in a secure, sandboxed environment. When offline or using PWA mode, documents and reflections are cached directly on your device storage via encrypted LocalStorage and CacheStorage. When connected, the workspace syncs with our dedicated server storage (<code className="text-accent-700 bg-accent-50 px-1 py-0.5 rounded">data/db.json</code>) without any third-party intermediate analytics.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">3. Zero Third-Party Advertising &amp; Sharing</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">3. Zero Third-Party Advertising &amp; Sharing</h4>
                 <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-amber-950 text-xs space-y-1">
                   <div className="font-bold flex items-center gap-1.5 text-amber-900">
                     <EyeOff className="w-3.5 h-3.5" />
@@ -325,7 +325,7 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">4. Cookies and Web Storage</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">4. Cookies and Web Storage</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   FolyNote does not deploy third-party advertising cookies or cross-site tracking pixels. Web Storage is utilized solely for session persistence ("Remember Me") and offline PWA functionality.
                 </p>
@@ -337,33 +337,33 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
           {activeTab === 'terms' && (
             <div className="space-y-6 animate-in fade-in duration-150">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Terms of Service</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Terms of Service</h3>
                 <p className="text-xs text-gray-500 mt-0.5">Governing use of the FolyNote Workspace</p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">1. Acceptance &amp; Scope of Services</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">1. Acceptance &amp; Scope of Services</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   By accessing or registering with FolyNote, you agree to these Terms. FolyNote provides a private personal workspace for journaling daily reflections, reviewing documents (PDF, Markdown, text), curating creative ideas, and tracking personal productivity.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">2. 100% User Intellectual Property Ownership</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">2. 100% User Intellectual Property Ownership</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   You retain complete, unencumbered ownership of all thoughts, ideas, writings, and files uploaded to FolyNote. FolyNote claims zero copyright, license, or intellectual property rights over any content you record in your personal space.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">3. User Responsibility for Access Credentials</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">3. User Responsibility for Access Credentials</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   You are responsible for maintaining the secrecy of your 6-digit access PIN and mobile number. Because FolyNote prioritizes client-side privacy, you should maintain periodic JSON backups via the Settings tab to safeguard your reflections across physical devices.
                 </p>
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-bold text-xs sm:text-sm text-gray-900">4. Service Availability &amp; Offline Continuity</h4>
+                <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-gray-100">4. Service Availability &amp; Offline Continuity</h4>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   FolyNote is engineered with Progressive Web App (PWA) offline capabilities. The service is provided on an "as is" and "as available" basis, designed to withstand network dropouts while keeping your local workspace responsive.
                 </p>
@@ -375,14 +375,14 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
           {activeTab === 'security' && (
             <div className="space-y-6 animate-in fade-in duration-150">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Security Architecture &amp; Data Safeguards</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Security Architecture &amp; Data Safeguards</h3>
                 <p className="text-xs text-gray-500 mt-0.5">Technical &amp; organizational measures protecting user reflections</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
-                  <div className="font-bold text-xs text-gray-900 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-purple-600" />
+                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 space-y-1.5">
+                  <div className="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-accent-600" />
                     <span>PIN-Gated Authentication</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
@@ -390,9 +390,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
-                  <div className="font-bold text-xs text-gray-900 flex items-center gap-1.5">
-                    <HardDrive className="w-3.5 h-3.5 text-purple-600" />
+                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 space-y-1.5">
+                  <div className="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                    <HardDrive className="w-3.5 h-3.5 text-accent-600" />
                     <span>Local Sandboxed Persistence</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
@@ -400,9 +400,9 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
-                  <div className="font-bold text-xs text-gray-900 flex items-center gap-1.5">
-                    <Download className="w-3.5 h-3.5 text-purple-600" />
+                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 space-y-1.5">
+                  <div className="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                    <Download className="w-3.5 h-3.5 text-accent-600" />
                     <span>Zero Vendor Lock-In</span>
                   </div>
                   <p className="text-[11px] text-gray-600 leading-relaxed">
@@ -410,8 +410,8 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
-                  <div className="font-bold text-xs text-gray-900 flex items-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800 space-y-1.5">
+                  <div className="font-bold text-xs text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
                     <Trash2 className="w-3.5 h-3.5 text-red-600" />
                     <span>Guaranteed Data Erasure</span>
                   </div>
@@ -421,15 +421,15 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs text-purple-950 flex items-center justify-between gap-4">
+              <div className="p-4 rounded-2xl bg-accent-50/70 border border-accent-100 text-xs text-accent-950 flex items-center justify-between gap-4">
                 <div>
                   <span className="font-bold block">Need an immediate data export?</span>
-                  <span className="text-[11px] text-purple-800">Download your complete encrypted workspace archive right now.</span>
+                  <span className="text-[11px] text-accent-800">Download your complete encrypted workspace archive right now.</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleExportData}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export JSON</span>
@@ -441,7 +441,7 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-5 sm:px-7 py-3.5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs shrink-0">
+        <div className="px-5 sm:px-7 py-3.5 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs shrink-0">
           <div className="flex items-center gap-2 text-gray-500 text-[11px]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             <span>DPDP Act 2023 Compliant &bull; 100% User Owned &bull; No Ad Tracking</span>
@@ -450,7 +450,7 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold text-xs transition cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 dark:text-gray-200 font-semibold text-xs transition cursor-pointer"
           >
             Close Trust Center
           </button>

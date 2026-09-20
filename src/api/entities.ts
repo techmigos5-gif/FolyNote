@@ -148,6 +148,7 @@ export interface DocumentRow {
   name: string;
   doc_type: string;
   size_label: string;
+  size_bytes: number | null;
   page_count: number;
   last_modified: string;
   tags: string[];
@@ -164,6 +165,7 @@ function rowToDocument(r: DocumentRow): DocumentItem {
     name: r.name,
     type: r.doc_type as DocumentItem['type'],
     size: r.size_label,
+    sizeBytes: r.size_bytes ?? undefined,
     pageCount: r.page_count,
     lastModified: r.last_modified,
     tags: r.tags ?? [],
@@ -182,6 +184,7 @@ function documentToRow(doc: DocumentItem, userId: string) {
     name: doc.name,
     doc_type: doc.type,
     size_label: doc.size,
+    size_bytes: doc.sizeBytes ?? null,
     page_count: doc.pageCount,
     last_modified: doc.lastModified,
     tags: doc.tags ?? [],

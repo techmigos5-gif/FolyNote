@@ -32,17 +32,26 @@ This creates:
 | Storage RLS policies | Objects readable/writable only by their owner |
 | `supabase_realtime` publication | Powers multi-tab/device sync |
 
-## 3. Auth settings (important)
+## 3. Auth settings (already applied to the linked project)
 
-FolyNote signs users in with **mobile number + 6-digit PIN** mapped onto Supabase
-email/password auth (synthetic `@users.folynote.app` emails; PIN padded deterministically —
-the raw PIN is never stored client-side).
+FolyNote signs users in with **mobile number + PIN** mapped onto Supabase
+email/password auth (synthetic `@users.folynote.app` emails; each PIN digit maps
+to a distinct letter — injective, so different PINs never collide, and the raw
+PIN is never stored client-side).
 
-1. Dashboard → **Authentication → Providers → Email**: keep enabled.
-2. Dashboard → **Authentication → Sign In / Providers**: **disable "Confirm email"**
-   (otherwise signup returns "confirmation required" instead of a session).
-3. Optional hardening: set **minimum password length** to 6 (the mapped password always
-   satisfies this).
+Applied via CLI on the linked project:
+
+```bash
+npx supabase config pull --force --yes   # bring remote auth config local
+# enable_confirmations was flipped to false in supabase/config.toml
+npx supabase config push --yes           # disable "Confirm email"
+npx supabase db push --yes               # apply the schema migration
+```
+
+Residual dashboard-only settings (optional):
+
+1. **Twilio SMS provider is enabled remotely**; the CLI cannot switch an active SMS provider off. It's inert for this app — no code path uses phone OTP — but disable it in **Authentication → Providers → Phone** if you want zero unused providers.
+2. Optional hardening: set **minimum password length** to 6 (the mapped password always satisfies this).
 
 ## 4. Run it
 
@@ -74,4 +83,4 @@ select count(*) from public.thoughts; -- rows visible only for your session
   last-write timestamp guard.
 - **Documents**: metadata in `documents` table; original binary in Storage at
   `documents/{userId}/{docId}-{name}` (private bucket, RLS-enforced).
-- **Auth**: see `src/api/auth.ts` for the mobile→email mapping and PIN→password padding.
+- **Auth**: see `src/api/auth.ts` for the mobile→email mapping and the injective PIN→password encoding.

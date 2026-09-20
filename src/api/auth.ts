@@ -16,11 +16,18 @@ export function toSupabaseEmail(mobile: string): string {
 
 /**
  * PINs are 4-6 digits. Supabase requires passwords of at least 6 characters,
- * so the PIN is padded to a fixed length. The result is deterministic
- * (same PIN -> same password) and never persisted client-side.
+ * so each PIN digit is mapped to a distinct letter. The mapping is injective
+ * (different PINs never collide — critical so one user's PIN cannot unlock
+ * another's account), deterministic (same PIN -> same password), and the
+ * raw PIN never appears in the password or is persisted client-side.
  */
+const PIN_DIGIT_ALPHABET = 'abcdefghij';
+
 export function pinToPassword(pin: string): string {
-  return `fn-${pin.replace(/[^0-9]/g, '').padEnd(12, '0')}`;
+  const digits = pin.replace(/[^0-9]/g, '');
+  return `fn-${Array.from(digits)
+    .map((d) => PIN_DIGIT_ALPHABET[Number(d)])
+    .join('')}`;
 }
 
 export interface AuthResult {

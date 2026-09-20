@@ -1,7 +1,7 @@
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-export type RealtimeTable = 'thoughts' | 'ideas' | 'documents' | 'pinned_items' | 'tags';
+export type RealtimeTable = 'thoughts' | 'ideas' | 'documents' | 'pinned_items' | 'tags' | 'reminders';
 
 export type RealtimeChange = {
   table: RealtimeTable;

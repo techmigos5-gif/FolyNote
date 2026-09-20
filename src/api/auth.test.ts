@@ -2,20 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { pinToPassword, toSupabaseEmail } from './auth';
 
 describe('pinToPassword', () => {
-  it('pads a short PIN deterministically to satisfy the 6-char minimum', () => {
-    expect(pinToPassword('1234')).toBe('fn-123400000000');
+  it('encodes a short PIN deterministically to satisfy the 6-char minimum', () => {
+    expect(pinToPassword('1234')).toBe('fn-bcde');
   });
 
-  it('keeps 6-digit PINs intact after the prefix padding', () => {
-    expect(pinToPassword('654321')).toBe('fn-654321000000');
+  it('keeps 6-digit PINs fully encoded after the prefix', () => {
+    expect(pinToPassword('654321')).toBe('fn-gfedcb');
   });
 
   it('strips non-digit input before mapping', () => {
-    expect(pinToPassword('12 34-56')).toBe('fn-123456000000');
+    expect(pinToPassword('12 34-56')).toBe('fn-bcdefg');
   });
 
   it('is deterministic — the same PIN always maps to the same password', () => {
     expect(pinToPassword('999')).toBe(pinToPassword('999'));
+  });
+
+  it('is injective — different PINs never collide (padding would)', () => {
+    expect(pinToPassword('1234')).not.toBe(pinToPassword('123400'));
+    expect(pinToPassword('12345')).not.toBe(pinToPassword('123450'));
   });
 
   it('never returns the raw PIN alone', () => {

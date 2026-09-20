@@ -7,9 +7,10 @@ import {
   tagsApi,
   thoughtsApi,
 } from '../api/entities';
+import { remindersApi } from '../api/reminders';
 import { documentsStorage } from '../api/documents';
 import { subscribeToWorkspace, RealtimeChange } from '../api/realtime';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, TagItem } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, TagItem } from '../types';
 
 interface UseWorkspaceSyncArgs {
   userId: string | null;
@@ -18,6 +19,7 @@ interface UseWorkspaceSyncArgs {
   documents: DocumentItem[];
   ideas: IdeaItem[];
   tags: TagItem[];
+  reminders: ReminderItem[];
   /** Replace local state with server rows (used by hydration + realtime re-pulls). */
   onServerData: (data: {
     thoughts: DailyThought[];
@@ -25,6 +27,7 @@ interface UseWorkspaceSyncArgs {
     documents: DocumentItem[];
     ideas: IdeaItem[];
     tags: TagItem[];
+    reminders: ReminderItem[];
   }) => void;
 }
 
@@ -42,18 +45,20 @@ interface EntityDelta<T> {
 }
 
 function diffEntity<T>(
-  prev: T[],
-  curr: T[],
+  prev: T[] | null | undefined,
+  curr: T[] | null | undefined,
   getKey: (x: T) => string,
 ): EntityDelta<T> {
-  const prevByKey = new Map(prev.map((x) => [getKey(x), x]));
-  const currByKey = new Map(curr.map((x) => [getKey(x), x]));
+  const safePrev = prev ?? [];
+  const safeCurr = curr ?? [];
+  const prevByKey = new Map(safePrev.map((x) => [getKey(x), x]));
+  const currByKey = new Map(safeCurr.map((x) => [getKey(x), x]));
 
-  const upserts = curr.filter((c) => {
+  const upserts = safeCurr.filter((c) => {
     const p = prevByKey.get(getKey(c));
     return !p || JSON.stringify(p) !== JSON.stringify(c);
   });
-  const deletes = prev.filter((p) => !currByKey.has(getKey(p))).map(getKey);
+  const deletes = safePrev.filter((p) => !currByKey.has(getKey(p))).map(getKey);
   return { upserts, deletes };
 }
 
@@ -74,7 +79,7 @@ function mergeServerRows<T>(target: T[], incoming: T[], getKey: (x: T) => string
  * Offline/local-only mode is preserved: without Supabase env vars nothing runs.
  */
 export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResult {
-  const { userId, thoughts, pinnedItems, documents, ideas, tags, onServerData } = args;
+  const { userId, thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData } = args;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,21 +100,23 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
     documents: DocumentItem[] | null;
     ideas: IdeaItem[] | null;
     tags: TagItem[] | null;
-  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null });
+    reminders: ReminderItem[] | null;
+  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null, reminders: null });
 
   // Latest state, readable inside stable realtime/hydration closures.
-  const latest = useRef({ thoughts, pinnedItems, documents, ideas, tags, onServerData });
-  latest.current = { thoughts, pinnedItems, documents, ideas, tags, onServerData };
+  const latest = useRef({ thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData });
+  latest.current = { thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData };
 
   const pullAll = async () => {
-    const [t, p, d, i, g] = await Promise.all([
+    const [t, p, d, i, g, r] = await Promise.all([
       thoughtsApi.listAll(),
       pinsApi.listAll(),
       documentsApi.listAll(),
       ideasApi.listAll(),
       tagsApi.listAll(),
+      remindersApi.listAll(),
     ]);
-    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, tags: g };
+    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, tags: g, reminders: r };
   };
 
   const pullOne = async (table: RealtimeChange['table']) => {
@@ -119,6 +126,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       case 'documents': return { documents: await documentsApi.listAll() };
       case 'ideas': return { ideas: await ideasApi.listAll() };
       case 'tags': return { tags: await tagsApi.listAll() };
+      case 'reminders': return { reminders: await remindersApi.listAll() };
     }
   };
 
@@ -127,7 +135,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
   // -------------------------------------------------------------
   useEffect(() => {
     if (!enabled) {
-      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null };
+      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null, reminders: null };
       return;
     }
 
@@ -173,6 +181,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       documents: base.documents ? diffEntity(base.documents, documents, (d) => d.id) : null,
       ideas: base.ideas ? diffEntity(base.ideas, ideas, (i) => i.id) : null,
       tags: base.tags ? diffEntity(base.tags, tags, (t) => t.name) : null,
+      reminders: base.reminders ? diffEntity(base.reminders, reminders, (r) => r.id) : null,
     };
 
     const hasDelta = Object.values(deltas).some(
@@ -182,7 +191,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
 
     // New baseline = current state; failures are logged and retried on the
     // next mutation (state remains authoritative locally meanwhile).
-    syncBaseline.current = { thoughts, pinnedItems, documents, ideas, tags };
+    syncBaseline.current = { thoughts, pinnedItems, documents, ideas, tags, reminders };
     markLocalWrite();
 
     const timer = setTimeout(async () => {
@@ -208,6 +217,12 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       if (deltas.tags) {
         await Promise.all(deltas.tags.upserts.map((t) => tagsApi.upsert(t, uid)));
       }
+      if (deltas.reminders) {
+        await Promise.all([
+          ...deltas.reminders.upserts.map((r) => remindersApi.upsert(r, uid)),
+          ...deltas.reminders.deletes.map((id) => remindersApi.remove(id)),
+        ]);
+      }
       if (deltas.documents) {
         await Promise.all([
           ...deltas.documents.upserts.map((doc) => documentsApi.upsert(doc, uid)),
@@ -222,7 +237,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [thoughts, pinnedItems, documents, ideas, tags, enabled, userId]);
+  }, [thoughts, pinnedItems, documents, ideas, tags, reminders, enabled, userId]);
 
   // -------------------------------------------------------------
   // Realtime: re-pull changed table when another tab/device mutates
@@ -246,6 +261,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
           documents: patch.documents ? mergeServerRows(cur.documents, patch.documents, (d) => d.id) : cur.documents,
           ideas: patch.ideas ? mergeServerRows(cur.ideas, patch.ideas, (i) => i.id) : cur.ideas,
           tags: patch.tags ? mergeServerRows(cur.tags, patch.tags, (t) => t.name) : cur.tags,
+          reminders: patch.reminders ? mergeServerRows(cur.reminders, patch.reminders, (r) => r.id) : cur.reminders,
         };
         // Keep the push-baseline coherent with what we just applied.
         syncBaseline.current = { ...syncBaseline.current, ...patch };

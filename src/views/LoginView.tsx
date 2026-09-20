@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BoySunsetIllustration } from '../components/BoySunsetIllustration';
-import { Eye, EyeOff, Lock, ArrowLeft, Compass, ShieldCheck, UserPlus, LogIn, User, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Compass, ShieldCheck, UserPlus, LogIn, User, CheckCircle2 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { useHeroArtwork } from '../hooks/useHeroArtwork';
 import { signUpWithMobilePin, signInWithMobilePin } from '../api/auth';
 import { TrustPrivacyModal, TrustModalTab } from '../components/TrustPrivacyModal';
 
@@ -31,9 +29,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [trustModalTab, setTrustModalTab] = useState<TrustModalTab | null>(null);
-
-  // Shared hero artwork state
-  const { activeImage, handleImageError } = useHeroArtwork();
+  const [heroFailed, setHeroFailed] = useState(false);
 
   const handleTabSwitch = (tab: 'login' | 'signup') => {
     setActiveTab(tab);
@@ -52,7 +48,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       return;
     }
     if (!cleanPin || cleanPin.length < 4) {
-      setError('Please enter your 6-digit security PIN');
+      setError('Please enter your PIN (4-6 digits)');
       return;
     }
 
@@ -102,7 +98,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-gradient-to-br from-purple-50 via-white to-pink-50/40 overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-gradient-to-br from-accent-50 via-white to-pink-50/40 dark:from-[#1b1424] dark:via-[#141118] dark:to-[#191221] overflow-hidden transition-colors duration-300">
       {/* Left side: Artwork or Uploaded Image with gentle meditative motion */}
       <motion.div
         id="login-visual-panel"
@@ -116,17 +112,20 @@ export const LoginView: React.FC<LoginViewProps> = ({
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
           className="w-full h-full"
         >
-          {activeImage ? (
+          {heroFailed ? (
+            /* Fallback: layered brand gradient scene */
+            <div className="w-full h-full bg-gradient-to-br from-[#28183d] via-accent-900 to-[#0f2027] relative">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(251,191,36,0.25),transparent_55%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_75%,rgba(124,58,237,0.35),transparent_60%)]" />
+            </div>
+          ) : (
             <img
               id="login-hero-image"
-              src={activeImage}
-              alt="Scenic Sunset over Mountain Lake"
-              referrerPolicy="no-referrer"
-              onError={handleImageError}
+              src="/boy-hero.png"
+              alt="A boy watching the sunset — your calm space awaits"
+              onError={() => setHeroFailed(true)}
               className="w-full h-full object-cover select-none"
             />
-          ) : (
-            <BoySunsetIllustration className="w-full h-full" />
           )}
         </motion.div>
 
@@ -154,7 +153,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             &ldquo;Take a breath, watch the sunset, and step into your space.&rdquo;
           </p>
           <span className="text-white/60 text-[10px] sm:text-xs mt-0.5">
-            Sunset at the ridge &bull; Peaceful contemplative space
+            A quiet moment at the ridge &bull; Your space awaits
           </span>
         </motion.div>
       </motion.div>
@@ -174,14 +173,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
               id="back-to-homepage-btn"
               type="button"
               onClick={onNavigateHome}
-              className="text-xs font-semibold text-purple-700 hover:text-purple-900 flex items-center gap-1.5 transition cursor-pointer px-3 py-1.5 rounded-xl hover:bg-purple-50"
+              className="text-xs font-semibold text-accent-700 hover:text-accent-900 flex items-center gap-1.5 transition cursor-pointer px-3 py-1.5 rounded-xl hover:bg-accent-50"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Sanctuary Homepage</span>
+              <span>Back to homepage</span>
             </motion.button>
             <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
               <Compass className="w-3 h-3 text-amber-500" />
-              <span>Sanctuary Home</span>
+              <span>FolyNote Home</span>
             </span>
           </motion.div>
         )}
@@ -190,22 +189,22 @@ export const LoginView: React.FC<LoginViewProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="w-full max-w-md bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-3xl shadow-xl shadow-purple-500/5 border border-purple-100/60"
+          className="w-full max-w-md bg-white/95 dark:bg-[#221a30] backdrop-blur-sm p-8 sm:p-10 rounded-3xl shadow-xl shadow-accent-500/5 border border-accent-100/60"
         >
           {/* Logo Badge with smooth hover float */}
           <div className="flex justify-center mb-5">
             <motion.div
               whileHover={{ scale: 1.08, rotate: [0, -3, 3, 0] }}
               transition={{ duration: 0.3 }}
-              className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-md shadow-purple-600/25 ring-4 ring-purple-50 cursor-pointer"
+              className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-accent-500 to-accent-700 flex items-center justify-center shadow-md shadow-accent-600/25 ring-4 ring-accent-50 cursor-pointer"
             >
-              <img src="/icon.svg" alt="FolyNote Logo" className="w-9 h-9" />
+              <img src="/brand.png" alt="FolyNote Logo" className="w-9 h-9" />
             </motion.div>
           </div>
 
           {/* Heading */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               {activeTab === 'login' ? 'Welcome Back' : 'Create Account'}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
@@ -216,14 +215,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </div>
 
           {/* Segmented Auth Mode Switcher Tab */}
-          <div className="flex p-1 bg-gray-100/90 rounded-2xl mb-6 border border-gray-200/60 shadow-2xs">
+          <div className="flex p-1 bg-gray-100/90 dark:bg-gray-800 rounded-2xl mb-6 border border-gray-200 dark:border-gray-700/60 shadow-2xs">
             <button
               id="auth-tab-login"
               type="button"
               onClick={() => handleTabSwitch('login')}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'login'
-                  ? 'bg-white text-purple-700 shadow-xs'
+                  ? 'bg-white dark:bg-[#221a30] text-accent-700 shadow-xs'
                   : 'text-gray-500 hover:text-gray-800'
               }`}
             >
@@ -236,7 +235,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               onClick={() => handleTabSwitch('signup')}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'signup'
-                  ? 'bg-white text-purple-700 shadow-xs'
+                  ? 'bg-white dark:bg-[#221a30] text-accent-700 shadow-xs'
                   : 'text-gray-500 hover:text-gray-800'
               }`}
             >
@@ -268,11 +267,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <label htmlFor="name-input" className="block text-xs font-semibold text-gray-700 mb-1.5">
+                <label htmlFor="name-input" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                   Full Name
                 </label>
-                <div className="flex rounded-xl border border-gray-200 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-100 bg-white overflow-hidden transition">
-                  <span className="inline-flex items-center px-3.5 bg-gray-50/80 border-r border-gray-200 text-gray-400">
+                <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-accent-600 focus-within:ring-2 focus-within:ring-accent-100 bg-white dark:bg-[#221a30] overflow-hidden transition">
+                  <span className="inline-flex items-center px-3.5 bg-gray-50/80 dark:bg-gray-900/40 border-r border-gray-200 dark:border-gray-700 text-gray-400">
                     <User className="w-4 h-4" />
                   </span>
                   <input
@@ -281,7 +280,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none"
                     autoComplete="name"
                   />
                 </div>
@@ -290,11 +289,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
             {/* Mobile Number Field */}
             <div>
-              <label htmlFor="mobile-input" className="block text-xs font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="mobile-input" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                 Mobile Number
               </label>
-              <div className="flex rounded-xl border border-gray-200 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-100 bg-white overflow-hidden transition">
-                <span className="inline-flex items-center px-3.5 bg-gray-50/80 border-r border-gray-200 text-xs font-bold text-gray-600 select-none">
+              <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-accent-600 focus-within:ring-2 focus-within:ring-accent-100 bg-white dark:bg-[#221a30] overflow-hidden transition">
+                <span className="inline-flex items-center px-3.5 bg-gray-50/80 dark:bg-gray-900/40 border-r border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 select-none">
                   +91
                 </span>
                 <input
@@ -303,7 +302,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="Enter 10-digit mobile number"
-                  className="w-full px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none"
                   autoComplete="tel"
                 />
               </div>
@@ -311,10 +310,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
             {/* PIN Field */}
             <div>
-              <label htmlFor="pin-input" className="block text-xs font-semibold text-gray-700 mb-1.5">
+              <label htmlFor="pin-input" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                 {activeTab === 'signup' ? 'Create 6-Digit PIN' : 'Security PIN'}
               </label>
-              <div className="relative rounded-xl border border-gray-200 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-100 bg-white overflow-hidden transition">
+              <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-accent-600 focus-within:ring-2 focus-within:ring-accent-100 bg-white dark:bg-[#221a30] overflow-hidden transition">
                 <input
                   id="pin-input"
                   type={showPin ? 'text' : 'password'}
@@ -322,7 +321,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   placeholder={activeTab === 'signup' ? 'Create 6-digit PIN' : 'Enter 6-digit PIN'}
-                  className="w-full px-3.5 py-2.5 pr-10 text-sm text-gray-900 placeholder:text-gray-400 tracking-widest focus:outline-none"
+                  className="w-full px-3.5 py-2.5 pr-10 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 tracking-widest focus:outline-none"
                 />
                 <button
                   type="button"
@@ -343,7 +342,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 exit={{ opacity: 0, height: 0 }}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="confirm-pin-input" className="block text-xs font-semibold text-gray-700">
+                  <label htmlFor="confirm-pin-input" className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
                     Confirm 6-Digit PIN
                   </label>
                   {confirmPin.length > 0 && pin === confirmPin && (
@@ -352,7 +351,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     </span>
                   )}
                 </div>
-                <div className="relative rounded-xl border border-gray-200 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-100 bg-white overflow-hidden transition">
+                <div className="relative rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-accent-600 focus-within:ring-2 focus-within:ring-accent-100 bg-white dark:bg-[#221a30] overflow-hidden transition">
                   <input
                     id="confirm-pin-input"
                     type={showConfirmPin ? 'text' : 'password'}
@@ -360,7 +359,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     value={confirmPin}
                     onChange={(e) => setConfirmPin(e.target.value)}
                     placeholder="Re-enter 6-digit PIN"
-                    className="w-full px-3.5 py-2.5 pr-10 text-sm text-gray-900 placeholder:text-gray-400 tracking-widest focus:outline-none"
+                    className="w-full px-3.5 py-2.5 pr-10 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 tracking-widest focus:outline-none"
                   />
                   <button
                     type="button"
@@ -381,7 +380,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-gray-300 accent-purple-600"
+                  className="w-4 h-4 rounded text-accent-600 focus:ring-accent-500 border-gray-300 accent-accent-600"
                 />
                 <span>Remember me on this device</span>
               </label>
@@ -394,7 +393,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               id="login-submit-btn"
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm shadow-md shadow-purple-600/20 transition duration-150 flex items-center justify-center gap-2 disabled:opacity-75 cursor-pointer"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-accent-600 hover:bg-accent-700 text-white font-semibold text-sm shadow-md shadow-accent-600/20 transition duration-150 flex items-center justify-center gap-2 disabled:opacity-75 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -415,7 +414,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   id="switch-to-signup-btn"
                   type="button"
                   onClick={() => handleTabSwitch('signup')}
-                  className="font-bold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer"
+                  className="font-bold text-accent-600 hover:text-accent-800 hover:underline cursor-pointer"
                 >
                   Sign Up here
                 </button>
@@ -427,7 +426,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   id="switch-to-login-btn"
                   type="button"
                   onClick={() => handleTabSwitch('login')}
-                  className="font-bold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer"
+                  className="font-bold text-accent-600 hover:text-accent-800 hover:underline cursor-pointer"
                 >
                   Log In here
                 </button>
@@ -436,9 +435,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </div>
 
           {/* Security Notice & DPDP Act Compliance */}
-          <div className="mt-5 pt-4 border-t border-gray-100 space-y-3">
+          <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
             <div className="flex items-start gap-2.5 text-xs text-gray-500">
-              <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+              <ShieldCheck className="w-4 h-4 text-accent-600 shrink-0 mt-0.5" />
               <p className="text-[11px] leading-relaxed text-gray-500">
                 Your real workspace is secured with your mobile &amp; PIN. Fully aligned with the <strong>DPDP Act (2023)</strong> with zero third-party telemetry.
               </p>
@@ -457,7 +456,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <button
                 type="button"
                 onClick={() => setTrustModalTab('privacy')}
-                className="hover:text-purple-700 hover:underline cursor-pointer"
+                className="hover:text-accent-700 hover:underline cursor-pointer"
               >
                 Privacy Policy
               </button>
@@ -465,7 +464,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <button
                 type="button"
                 onClick={() => setTrustModalTab('terms')}
-                className="hover:text-purple-700 hover:underline cursor-pointer"
+                className="hover:text-accent-700 hover:underline cursor-pointer"
               >
                 Terms
               </button>
@@ -473,7 +472,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
               <button
                 type="button"
                 onClick={() => setTrustModalTab('security')}
-                className="hover:text-purple-700 hover:underline cursor-pointer"
+                className="hover:text-accent-700 hover:underline cursor-pointer"
               >
                 Data Protection
               </button>
@@ -483,7 +482,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           {/* Slogan subtext */}
           <div className="mt-4 text-center">
             <p className="text-[11px] text-gray-400 font-medium tracking-wide">
-              Your space. Your thoughts. Your growth.
+              Your files. Your thoughts. Your space.
             </p>
           </div>
         </motion.div>

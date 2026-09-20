@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DocumentItem } from '../types';
+import { documentsStorage } from '../api/documents';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -95,7 +96,28 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
     window.print();
   };
 
-  const handleDownload = () => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    // Prefer the original uploaded binary from Supabase Storage when available
+    // (PDFs keep their real pages/annotations); otherwise export the text content.
+    if (document.storagePath) {
+      setIsDownloading(true);
+      try {
+        const blob = await documentsStorage.download(document.storagePath);
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = window.document.createElement('a');
+          a.href = url;
+          a.download = document.name;
+          a.click();
+          URL.revokeObjectURL(url);
+          return;
+        }
+      } finally {
+        setIsDownloading(false);
+      }
+    }
     const blob = new Blob([document.content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement('a');
@@ -129,19 +151,19 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
       }`}
     >
       {/* 1. Header Bar: "← System Design Notes.pdf" */}
-      <div className="h-14 bg-white border-b border-gray-200 px-4 sm:px-6 flex items-center justify-between text-gray-900 z-20 shrink-0">
+      <div className="h-14 bg-white dark:bg-[#221a30] border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 flex items-center justify-between text-gray-900 dark:text-gray-100 z-20 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <button
             id="back-to-docs-btn"
             onClick={onBack}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-purple-700 transition flex items-center gap-1.5 font-semibold text-sm cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 dark:text-gray-300 hover:text-accent-700 transition flex items-center gap-1.5 font-semibold text-sm cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="truncate max-w-xs sm:max-w-md">{document.name}</span>
           </button>
 
           {/* Format Badge */}
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-purple-100 text-purple-700">
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-accent-100 text-accent-700">
             {document.type}
           </span>
         </div>
@@ -149,11 +171,11 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
         <div className="flex items-center gap-2">
           {/* View Mode Toggle for MD/Text */}
           {document.type === 'markdown' && (
-            <div className="flex items-center rounded-lg bg-gray-100 p-0.5 text-xs font-semibold">
+            <div className="flex items-center rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5 text-xs font-semibold">
               <button
                 onClick={() => setViewMode('rendered')}
                 className={`px-2.5 py-1 rounded-md transition ${
-                  viewMode === 'rendered' ? 'bg-white text-purple-700 shadow-2xs' : 'text-gray-600'
+                  viewMode === 'rendered' ? 'bg-white dark:bg-[#221a30] text-accent-700 shadow-2xs' : 'text-gray-600'
                 }`}
               >
                 Rendered
@@ -161,7 +183,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
               <button
                 onClick={() => setViewMode('raw')}
                 className={`px-2.5 py-1 rounded-md transition ${
-                  viewMode === 'raw' ? 'bg-white text-purple-700 shadow-2xs' : 'text-gray-600'
+                  viewMode === 'raw' ? 'bg-white dark:bg-[#221a30] text-accent-700 shadow-2xs' : 'text-gray-600'
                 }`}
               >
                 Markdown Raw
@@ -172,7 +194,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
           {/* Copy content */}
           <button
             onClick={handleCopyText}
-            className="p-1.5 rounded-lg text-gray-600 hover:text-purple-700 hover:bg-gray-100 transition"
+            className="p-1.5 rounded-lg text-gray-600 hover:text-accent-700 hover:bg-gray-100 transition"
             title="Copy document content"
           >
             {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
@@ -181,8 +203,9 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
           {/* Download button */}
           <button
             onClick={handleDownload}
-            className="p-1.5 rounded-lg text-gray-600 hover:text-purple-700 hover:bg-gray-100 transition"
-            title="Download document"
+            disabled={isDownloading}
+            className="p-1.5 rounded-lg text-gray-600 hover:text-accent-700 hover:bg-gray-100 transition disabled:opacity-50"
+            title={document.storagePath ? 'Download original file' : 'Download document'}
           >
             <Download className="w-4 h-4" />
           </button>
@@ -190,7 +213,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
           {/* Print button */}
           <button
             onClick={handlePrint}
-            className="p-1.5 rounded-lg text-gray-600 hover:text-purple-700 hover:bg-gray-100 transition"
+            className="p-1.5 rounded-lg text-gray-600 hover:text-accent-700 hover:bg-gray-100 transition"
             title="Print document"
           >
             <Printer className="w-4 h-4" />
@@ -204,7 +227,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setShowOutline(!showOutline)}
-            className={`p-1.5 rounded hover:bg-white/10 transition ${showOutline ? 'text-purple-400 bg-white/10' : ''}`}
+            className={`p-1.5 rounded hover:bg-white/10 transition ${showOutline ? 'text-accent-400 bg-white/10 dark:bg-[#221a30]' : ''}`}
             title="Toggle Outline / Table of Contents"
           >
             <Menu className="w-4 h-4" />
@@ -275,7 +298,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className={`p-1.5 rounded hover:bg-white/10 transition ${showSearch ? 'text-purple-400 bg-white/10' : ''}`}
+            className={`p-1.5 rounded hover:bg-white/10 transition ${showSearch ? 'text-accent-400 bg-white/10 dark:bg-[#221a30]' : ''}`}
             title="Search in document"
           >
             <Search className="w-4 h-4" />
@@ -301,7 +324,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
               placeholder="Find text in document..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1A1D24] px-2.5 py-1 rounded text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="w-full bg-[#1A1D24] px-2.5 py-1 rounded text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
             />
           </div>
           <button
@@ -342,7 +365,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
                     onClick={() => setCurrentPage(sec.page)}
                     className={`w-full text-left px-2.5 py-2 rounded-lg transition flex items-center justify-between ${
                       currentPage === sec.page
-                        ? 'bg-purple-600/30 text-purple-300 font-semibold border border-purple-500/40'
+                        ? 'bg-accent-600/30 text-accent-300 font-semibold border border-accent-500/40'
                         : 'text-gray-300 hover:bg-white/5'
                     }`}
                   >
@@ -357,7 +380,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
                     onClick={() => setCurrentPage(p)}
                     className={`w-full text-left px-2.5 py-1.5 rounded-lg transition flex items-center justify-between ${
                       currentPage === p
-                        ? 'bg-purple-600/30 text-purple-300 font-semibold'
+                        ? 'bg-accent-600/30 text-accent-300 font-semibold'
                         : 'text-gray-400 hover:bg-white/5'
                     }`}
                   >
@@ -378,10 +401,10 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
               transformOrigin: 'top center',
               transition: 'transform 0.15s ease-out',
             }}
-            className="w-full max-w-3xl bg-white text-gray-900 rounded-lg shadow-2xl p-8 sm:p-14 min-h-[900px] flex flex-col justify-between selection:bg-purple-200 selection:text-purple-900"
+            className="w-full max-w-3xl bg-white dark:bg-[#221a30] text-gray-900 dark:text-gray-100 rounded-lg shadow-2xl p-8 sm:p-14 min-h-[900px] flex flex-col justify-between selection:bg-accent-200 selection:text-accent-900"
           >
             {/* Document Header Bar inside sheet */}
-            <div className="border-b border-gray-100 pb-4 mb-8 flex items-center justify-between text-[11px] text-gray-400 select-none">
+            <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-8 flex items-center justify-between text-[11px] text-gray-400 select-none">
               <span>{document.name}</span>
               <span className="font-mono">Page {currentPage} of {totalPages}</span>
             </div>
@@ -389,11 +412,11 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
             {/* Document Body */}
             <div className="flex-1 space-y-6">
               {viewMode === 'raw' ? (
-                <pre className="p-4 bg-gray-50 rounded-xl font-mono text-xs text-gray-800 whitespace-pre-wrap border border-gray-200 overflow-x-auto">
+                <pre className="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl font-mono text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap border border-gray-200 dark:border-gray-700 overflow-x-auto">
                   {getPageContent(currentPage)}
                 </pre>
               ) : (
-                <div className="prose prose-purple max-w-none text-gray-800 prose-headings:text-gray-950 prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-base prose-p:leading-relaxed prose-li:my-1 prose-pre:bg-gray-900 prose-pre:text-purple-200">
+                <div className="prose prose-purple max-w-none text-gray-800 dark:text-gray-200 prose-headings:text-gray-950 prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-base prose-p:leading-relaxed prose-li:my-1 prose-pre:bg-gray-900 prose-pre:text-accent-200">
                   <ReactMarkdown>
                     {getPageContent(currentPage)}
                   </ReactMarkdown>
@@ -402,7 +425,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
             </div>
 
             {/* Document Footer inside sheet */}
-            <div className="border-t border-gray-100 pt-6 mt-12 flex items-center justify-between text-[10px] text-gray-400 select-none">
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-6 mt-12 flex items-center justify-between text-[10px] text-gray-400 select-none">
               <span>Confidential • FolyNote Offline Cache</span>
               <span className="font-mono">ID: {document.id}</span>
             </div>

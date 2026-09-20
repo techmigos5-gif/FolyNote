@@ -109,6 +109,7 @@ function makeProps(overrides: Record<string, unknown> = {}) {
     documents: [],
     ideas: [],
     tags: [],
+    reminders: [],
     onServerData: vi.fn(),
     ...overrides,
   };

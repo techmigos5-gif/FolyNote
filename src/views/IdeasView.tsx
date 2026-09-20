@@ -108,7 +108,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
       {/* 1. Header with Title and + New Idea button */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
             Ideas
           </h1>
           <p className="text-xs text-gray-500 mt-1">
@@ -119,7 +119,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
         <button
           id="new-idea-btn"
           onClick={openNewModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-98 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-purple-600/20 transition cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 active:scale-98 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-accent-600/20 transition cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>New Idea</span>
@@ -136,7 +136,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
             placeholder="Search ideas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100 shadow-2xs"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-[#221a30] border border-gray-200 dark:border-gray-700 text-xs text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100 shadow-2xs"
           />
         </div>
 
@@ -145,7 +145,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
           <select
             value={selectedTag}
             onChange={(e) => setSelectedTag(e.target.value)}
-            className="w-full appearance-none px-3.5 py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-semibold text-gray-700 focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100 shadow-2xs pr-8 cursor-pointer"
+            className="w-full appearance-none px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#221a30] border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100 shadow-2xs pr-8 cursor-pointer"
           >
             {availableTags.map((t) => (
               <option key={t} value={t}>
@@ -160,17 +160,17 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
       {/* 3. Ideas List */}
       <div className="space-y-3.5">
         {filteredIdeas.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-gray-100 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
+          <div className="bg-white dark:bg-[#221a30] p-12 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-accent-50 text-accent-600 mx-auto flex items-center justify-center">
               <Lightbulb className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-gray-800">No ideas found</h3>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">No ideas found</h3>
             <p className="text-xs text-gray-500">
               Record your next breakthrough project or concept.
             </p>
             <button
               onClick={openNewModal}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" />
               Capture Idea
@@ -183,7 +183,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
             return (
               <div
                 key={idea.id}
-                className="p-5 rounded-2xl bg-white border border-gray-100 hover:border-purple-200 shadow-2xs hover:shadow-md transition space-y-2.5 group"
+                className="p-5 rounded-2xl bg-white dark:bg-[#221a30] border border-gray-100 dark:border-gray-800 hover:border-accent-200 shadow-2xs hover:shadow-md transition space-y-2.5 group"
               >
                 {/* Header row: Star + Title + Tag Pill + Date */}
                 <div className="flex items-center justify-between gap-3">
@@ -200,7 +200,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                       />
                     </button>
 
-                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition truncate">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-accent-700 transition truncate">
                       {idea.title}
                     </h3>
 
@@ -208,8 +208,8 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                     <span
                       className={`px-2.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide shrink-0 ${
                         isAI
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-indigo-100 text-indigo-700'
+                          ? 'bg-accent-100 text-accent-700'
+                          : 'bg-accent-100 text-accent-700'
                       }`}
                     >
                       {idea.tag}
@@ -225,11 +225,11 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                       <button
                         onClick={() => onTogglePinIdea(idea)}
                         className={`p-1.5 rounded-lg transition ${
-                          idea.isPinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:text-purple-600 hover:bg-gray-50'
+                          idea.isPinned ? 'text-accent-600 bg-accent-50' : 'text-gray-400 hover:text-accent-600 hover:bg-gray-50'
                         }`}
                         title={idea.isPinned ? 'Unpin' : 'Pin to dashboard'}
                       >
-                        <Pin className={`w-3.5 h-3.5 ${idea.isPinned ? 'fill-purple-600' : ''}`} />
+                        <Pin className={`w-3.5 h-3.5 ${idea.isPinned ? 'fill-accent-600' : ''}`} />
                       </button>
                       <button
                         onClick={() => openEditModal(idea)}
@@ -266,11 +266,11 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
       {/* Modal for New / Edit Idea */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#221a30] p-6 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-purple-600" />
-                <h3 className="text-base font-bold text-gray-900">
+                <Lightbulb className="w-5 h-5 text-accent-600" />
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                   {editingIdea ? 'Edit Idea' : 'Capture New Idea'}
                 </h3>
               </div>
@@ -284,7 +284,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
 
             <form onSubmit={handleModalSubmit} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Idea Title
                 </label>
                 <input
@@ -293,12 +293,12 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="e.g. AI Assistant for Teachers"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Tag Category
                 </label>
                 <div className="flex items-center gap-2 flex-wrap mb-2">
@@ -309,8 +309,8 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                       onClick={() => setFormTag(t)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
                         formTag === t
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                          ? 'bg-accent-600 text-white border-accent-600'
+                          : 'bg-gray-50 dark:bg-gray-900/40 border-gray-200 dark:border-gray-700 text-gray-600 hover:bg-gray-100'
                       }`}
                     >
                       {t}
@@ -322,12 +322,12 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                   value={formTag}
                   onChange={(e) => setFormTag(e.target.value)}
                   placeholder="Or custom tag..."
-                  className="w-full px-3 py-1.5 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-purple-600"
+                  className="w-full px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:border-accent-600"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -336,11 +336,11 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="What is this idea about? How does it help users?"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -350,7 +350,7 @@ export const IdeasView: React.FC<IdeasViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-semibold"
                 >
                   {editingIdea ? 'Save Changes' : 'Save Idea'}
                 </button>

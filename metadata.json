@@ -1,6 +1,6 @@
 {
   "name": "FolyNote",
-  "description": "Your files. Your thoughts. Your space. — notes, documents, and ideas workspace with multi-format viewer and offline PWA access.",
+  "description": "Your files. Your thoughts. Your space. — notes, documents, and ideas workspace with reminders, calm soundscapes, and native Android/iOS apps via Capacitor.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

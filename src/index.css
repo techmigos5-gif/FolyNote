@@ -4,6 +4,63 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------
+   Accent theming: the `accent-*` Tailwind scale is mapped to CSS
+   variables that swap at runtime via <html data-accent="...">.
+   Every component using accent-* follows the chosen palette.
+   --------------------------------------------------------------- */
+@theme inline {
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
+  --color-accent-800: var(--accent-800);
+  --color-accent-900: var(--accent-900);
+  --color-accent-950: var(--accent-950);
+}
+
+:root,
+[data-accent='violet'] {
+  --accent-50: #f5f3ff; --accent-100: #ede9fe; --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd; --accent-400: #a78bfa; --accent-500: #8b5cf6;
+  --accent-600: #7c3aed; --accent-700: #6d28d9; --accent-800: #5b21b6;
+  --accent-900: #4c1d95; --accent-950: #3b0764;
+}
+[data-accent='ocean'] {
+  --accent-50: #f0f9ff; --accent-100: #e0f2fe; --accent-200: #bae6fd;
+  --accent-300: #7dd3fc; --accent-400: #38bdf8; --accent-500: #0ea5e9;
+  --accent-600: #0284c7; --accent-700: #0369a1; --accent-800: #075985;
+  --accent-900: #0c4a6e; --accent-950: #082f49;
+}
+[data-accent='sunset'] {
+  --accent-50: #fff7ed; --accent-100: #ffedd5; --accent-200: #fed7aa;
+  --accent-300: #fdba74; --accent-400: #fb923c; --accent-500: #f97316;
+  --accent-600: #ea580c; --accent-700: #c2410c; --accent-800: #9a3412;
+  --accent-900: #7c2d12; --accent-950: #431407;
+}
+[data-accent='rose'] {
+  --accent-50: #fff1f2; --accent-100: #ffe4e6; --accent-200: #fecdd3;
+  --accent-300: #fda4af; --accent-400: #fb7185; --accent-500: #f43f5e;
+  --accent-600: #e11d48; --accent-700: #be123c; --accent-800: #9f1239;
+  --accent-900: #881337; --accent-950: #4c0519;
+}
+[data-accent='forest'] {
+  --accent-50: #ecfdf5; --accent-100: #d1fae5; --accent-200: #a7f3d0;
+  --accent-300: #6ee7b7; --accent-400: #34d399; --accent-500: #10b981;
+  --accent-600: #059669; --accent-700: #047857; --accent-800: #065f46;
+  --accent-900: #064e3b; --accent-950: #022c22;
+}
+[data-accent='midnight'] {
+  --accent-50: #eef2ff; --accent-100: #e0e7ff; --accent-200: #c7d2fe;
+  --accent-300: #a5b4fc; --accent-400: #818cf8; --accent-500: #6366f1;
+  --accent-600: #4f46e5; --accent-700: #4338ca; --accent-800: #3730a3;
+  --accent-900: #312e81; --accent-950: #1e1b4b;
+}
+
+/* ---------------------------------------------------------------
    Accessibility: respect prefers-reduced-motion globally.
    Framer Motion animations are additionally softened via
    <MotionConfig reducedMotion="user"> in main.tsx.
@@ -23,5 +80,39 @@
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
+  }
+}
+
+/* Chart tokens (recharts reads inline SVG attrs, so it needs vars) */
+:root {
+  --chart-grid: #f3eef9;
+  --chart-axis: #e5e7eb;
+  --chart-tick: #9ca3af;
+}
+.dark {
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: rgba(255, 255, 255, 0.16);
+  --chart-tick: #8b8ba3;
+}
+
+/* ---------------------------------------------------------------
+   "Buttery" theme switching: while <html> carries .theme-animating
+   (added for ~400ms around a light/dark or accent change), every
+   surface cross-fades its colors instead of snapping.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-animating,
+  html.theme-animating *,
+  html.theme-animating *::before,
+  html.theme-animating *::after {
+    transition:
+      background-color 320ms ease,
+      border-color 320ms ease,
+      color 220ms ease,
+      fill 240ms ease,
+      stroke 240ms ease,
+      box-shadow 320ms ease,
+      outline-color 320ms ease
+      !important;
   }
 }

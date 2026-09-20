@@ -151,9 +151,16 @@ end;
 $$;
 
 drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+-- Wrapped so a permission quirk on hosted stacks can never roll back the
+-- whole migration; a warning is emitted instead.
+do $$
+begin
+  create trigger on_auth_user_created
+    after insert on auth.users
+    for each row execute function public.handle_new_user();
+exception when others then
+  raise warning 'on_auth_user_created trigger: %', sqlerrm;
+end $$;
 
 -- ============================================================
 -- Storage: private per-user document bucket
@@ -199,10 +206,40 @@ alter table public.documents replica identity full;
 alter table public.ideas replica identity full;
 alter table public.tags replica identity full;
 
-drop publication if exists supabase_realtime;
-create publication supabase_realtime for table
-  public.thoughts,
-  public.pinned_items,
-  public.documents,
-  public.ideas,
-  public.tags;
+-- The supabase_realtime publication is platform-managed on hosted projects
+-- and must never be dropped/recreated here. Tables are added idempotently;
+-- on a bare local stack the publication is created first if missing.
+do $$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+exception when others then
+  raise warning 'supabase_realtime publication: %', sqlerrm;
+end $$;
+
+do $$ begin
+  alter publication supabase_realtime add table public.thoughts;
+exception when duplicate_object then null; when others then
+  raise warning 'realtime thoughts: %', sqlerrm;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.pinned_items;
+exception when duplicate_object then null; when others then
+  raise warning 'realtime pinned_items: %', sqlerrm;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.documents;
+exception when duplicate_object then null; when others then
+  raise warning 'realtime documents: %', sqlerrm;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.ideas;
+exception when duplicate_object then null; when others then
+  raise warning 'realtime ideas: %', sqlerrm;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.tags;
+exception when duplicate_object then null; when others then
+  raise warning 'realtime tags: %', sqlerrm;
+end $$;

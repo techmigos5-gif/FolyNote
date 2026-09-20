@@ -12,7 +12,8 @@ import {
   X,
   Compass,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  BellRing
 } from 'lucide-react';
 import { TrustPrivacyModal } from './TrustPrivacyModal';
 
@@ -44,6 +45,7 @@ const FILE_ITEMS: NavItem[] = [
 ];
 
 const ORGANIZE_ITEMS: NavItem[] = [
+  { view: 'reminders', label: 'Reminders', icon: BellRing },
   { view: 'tags', label: 'Tags', icon: Tag },
 ];
 
@@ -106,11 +108,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         aria-current={active ? 'page' : undefined}
         className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition cursor-pointer ${
           active
-            ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 font-semibold shadow-2xs shadow-purple-100 dark:shadow-none'
+            ? 'bg-accent-50 dark:bg-accent-950/50 text-accent-700 dark:text-accent-300 font-semibold shadow-2xs shadow-accent-100 dark:shadow-none'
             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100'
         }`}
       >
-        <Icon className={`w-4 h-4 ${active ? 'text-purple-600 dark:text-purple-400 stroke-[2.2]' : 'text-gray-400 stroke-[1.8]'}`} />
+        <Icon className={`w-4 h-4 ${active ? 'text-accent-600 dark:text-accent-400 stroke-[2.2]' : 'text-gray-400 stroke-[1.8]'}`} />
         <span>{item.label}</span>
       </button>
     );
@@ -134,14 +136,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => handleItemClick('dashboard')}
             className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400 flex items-center justify-center shadow-xs shadow-purple-500/20 group-hover:scale-105 transition">
-              <img src="/icon.svg" alt="FolyNote" className="w-6 h-6" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-600 via-pink-500 to-amber-400 flex items-center justify-center shadow-xs shadow-accent-500/20 group-hover:scale-105 transition">
+              <img src="/brand.png" alt="FolyNote" className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition block leading-tight">
+              <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-accent-700 dark:group-hover:text-accent-300 transition block leading-tight">
                 FolyNote
               </span>
-              <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">
+              <span className="text-[10px] text-accent-600 dark:text-accent-400 font-medium">
                 Your files. Your thoughts. Your space.
               </span>
             </div>
@@ -215,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Before Logout Serene Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-[#1E1729] p-6 sm:p-7 text-gray-900 dark:text-gray-100 border border-purple-100 dark:border-purple-900/60 shadow-2xl space-y-5">
+          <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-[#1E1729] p-6 sm:p-7 text-gray-900 dark:text-gray-100 border border-accent-100 dark:border-accent-900/60 shadow-2xl space-y-5">
             {/* Background Glow */}
             <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -224,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <Compass className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-1.5 text-xs text-purple-700 dark:text-purple-300 font-bold uppercase tracking-wider mb-0.5">
+                <div className="flex items-center gap-1.5 text-xs text-accent-700 dark:text-accent-300 font-bold uppercase tracking-wider mb-0.5">
                   <Sparkles className="w-3 h-3 text-amber-500" />
                   <span>Before You Step Away</span>
                 </div>
@@ -239,7 +241,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               feature tour, or practice a 60-second mindful breathing break?
             </p>
 
-            <div className="p-3 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/60 text-xs text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <div className="p-3 rounded-2xl bg-accent-50/70 dark:bg-accent-950/30 border border-accent-100 dark:border-accent-900/60 text-xs text-gray-700 dark:text-gray-300 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
               <span>All your thoughts, documents, and notes remain saved privately on your device and in your cloud space.</span>
             </div>

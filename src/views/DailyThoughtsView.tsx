@@ -163,13 +163,13 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
       
       {/* 1. Header with Title and + New Thought button */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           Daily Thoughts
         </h1>
         <button
           id="new-thought-btn"
           onClick={openNewModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-98 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-purple-600/20 transition cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 active:scale-98 text-white text-xs sm:text-sm font-semibold shadow-sm shadow-accent-600/20 transition cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>New Thought</span>
@@ -177,7 +177,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
       </div>
 
       {/* 2. Calendar Month Bar & Week Day Picker */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-2xs space-y-5">
+      <div className="bg-white dark:bg-[#221a30] p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xs space-y-5">
         
         {/* Month selector header */}
         <div className="flex items-center justify-between px-2">
@@ -185,13 +185,13 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
             type="button"
             onClick={handlePrevWeek}
             aria-label="Previous week"
-            className="p-1.5 rounded-lg text-gray-500 hover:text-purple-700 hover:bg-purple-50 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-gray-500 hover:text-accent-700 hover:bg-accent-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-gray-800">
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
               {monthYearLabel}
             </span>
             <button
@@ -203,7 +203,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                 const d = String(now.getDate()).padStart(2, '0');
                 onSelectDate(`${y}-${m}-${d}`);
               }}
-              className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 transition cursor-pointer"
+              className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-accent-50 hover:bg-accent-100 text-accent-700 transition cursor-pointer"
             >
               Today
             </button>
@@ -213,7 +213,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
             type="button"
             onClick={handleNextWeek}
             aria-label="Next week"
-            className="p-1.5 rounded-lg text-gray-500 hover:text-purple-700 hover:bg-purple-50 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-gray-500 hover:text-accent-700 hover:bg-accent-50 transition cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -230,11 +230,11 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                 onClick={() => onSelectDate(item.fullDate)}
                 className={`py-2 sm:py-3 px-0.5 sm:px-1 rounded-2xl flex flex-col items-center justify-center transition cursor-pointer ${
                   isActive
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/25 ring-2 ring-purple-200'
-                    : 'bg-gray-50/70 hover:bg-purple-50 text-gray-700 hover:text-purple-700 border border-gray-100'
+                    ? 'bg-accent-600 text-white shadow-md shadow-accent-600/25 ring-2 ring-accent-200'
+                    : 'bg-gray-50/70 dark:bg-gray-900/40 hover:bg-accent-50 text-gray-700 dark:text-gray-300 hover:text-accent-700 border border-gray-100 dark:border-gray-800'
                 }`}
               >
-                <span className={`text-[10px] sm:text-[11px] font-medium ${isActive ? 'text-purple-100' : 'text-gray-400'}`}>
+                <span className={`text-[10px] sm:text-[11px] font-medium ${isActive ? 'text-accent-100' : 'text-gray-400'}`}>
                   {item.dayName}
                 </span>
                 <span className="text-xs sm:text-base font-bold mt-0.5 sm:mt-1">
@@ -248,7 +248,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
 
       {/* 3. Selected Day Header */}
       <div>
-        <h2 className="text-sm font-bold text-gray-700 tracking-wide">
+        <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 tracking-wide">
           {getFullDateDisplay(selectedDate)}
         </h2>
       </div>
@@ -256,17 +256,17 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
       {/* 4. Thoughts List for Selected Day */}
       <div className="space-y-4">
         {currentDayThoughts.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-gray-100 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 mx-auto flex items-center justify-center">
+          <div className="bg-white dark:bg-[#221a30] p-12 rounded-2xl border border-gray-100 dark:border-gray-800 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-accent-50 text-accent-600 mx-auto flex items-center justify-center">
               <CalendarIcon className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-gray-800">No thoughts recorded for this day</h3>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">No thoughts recorded for this day</h3>
             <p className="text-xs text-gray-500 max-w-sm mx-auto">
               Take a mindful moment to reflect on your goals, accomplishments, or learnings.
             </p>
             <button
               onClick={openNewModal}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" />
               Write First Thought
@@ -276,7 +276,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
           currentDayThoughts.map((thought) => (
             <div
               key={thought.id}
-              className="bg-white p-6 rounded-2xl border border-gray-100 shadow-2xs hover:shadow-md hover:border-purple-100 transition space-y-4"
+              className="bg-white dark:bg-[#221a30] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xs hover:shadow-md hover:border-accent-100 transition space-y-4"
             >
               {/* Card Header: Time and Actions */}
               <div className="flex items-center justify-between">
@@ -289,11 +289,11 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                   <button
                     onClick={() => onTogglePinThought(thought)}
                     className={`p-1.5 rounded-lg transition ${
-                      thought.isPinned ? 'text-purple-600 bg-purple-50' : 'text-gray-400 hover:text-purple-600 hover:bg-gray-100'
+                      thought.isPinned ? 'text-accent-600 bg-accent-50' : 'text-gray-400 hover:text-accent-600 hover:bg-gray-100'
                     }`}
                     title={thought.isPinned ? 'Unpin from dashboard' : 'Pin to dashboard'}
                   >
-                    <Pin className={`w-4 h-4 ${thought.isPinned ? 'fill-purple-600' : ''}`} />
+                    <Pin className={`w-4 h-4 ${thought.isPinned ? 'fill-accent-600' : ''}`} />
                   </button>
                   <button
                     onClick={() => openEditModal(thought)}
@@ -317,12 +317,12 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
               </div>
 
               {/* Title */}
-              <h3 className="text-base font-bold text-gray-900">
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                 {thought.title}
               </h3>
 
               {/* Content Body */}
-              <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed font-normal">
+              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed font-normal">
                 {thought.content}
               </p>
 
@@ -332,7 +332,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                   {thought.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[11px] font-medium border border-purple-100/60"
+                      className="px-2.5 py-0.5 rounded-full bg-accent-50 text-accent-700 text-[11px] font-medium border border-accent-100/60"
                     >
                       #{tag}
                     </span>
@@ -347,13 +347,13 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
       {/* Modal for New / Edit Thought */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl bg-white p-5 sm:p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl bg-white dark:bg-[#221a30] p-5 sm:p-6 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-accent-100 text-accent-700 flex items-center justify-center">
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                   {editingThought ? 'Edit Thought' : 'Capture Daily Thought'}
                 </h3>
               </div>
@@ -367,7 +367,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
 
             <form onSubmit={handleModalSubmit} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Title
                 </label>
                 <input
@@ -376,24 +376,24 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="e.g. End of the day, Morning Reflections"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Date
                   </label>
                   <input
                     type="date"
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-purple-600"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:border-accent-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Time
                   </label>
                   <input
@@ -401,13 +401,13 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                     value={formTime}
                     onChange={(e) => setFormTime(e.target.value)}
                     placeholder="10:30 PM"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-purple-600"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:border-accent-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Thought Content
                 </label>
                 <textarea
@@ -416,12 +416,12 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                   value={formContent}
                   onChange={(e) => setFormContent(e.target.value)}
                   placeholder="What was completed today? What are you grateful for? What is next?"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-100"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Tags (comma separated)
                 </label>
                 <input
@@ -429,11 +429,11 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                   value={formTags}
                   onChange={(e) => setFormTags(e.target.value)}
                   placeholder="ECE, Study, Tech, Work"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-purple-600"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:border-accent-600"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -443,7 +443,7 @@ export const DailyThoughtsView: React.FC<DailyThoughtsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-xs shadow-purple-600/20"
+                  className="px-4 py-2 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-semibold shadow-xs shadow-accent-600/20"
                 >
                   {editingThought ? 'Save Changes' : 'Record Thought'}
                 </button>

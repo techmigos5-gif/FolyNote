@@ -1,4 +1,4 @@
-export type NavView = 
+export type NavView =
   | 'homepage'
   | 'dashboard'
   | 'daily-thoughts'
@@ -6,6 +6,7 @@ export type NavView =
   | 'documents'
   | 'document-viewer'
   | 'ideas'
+  | 'reminders'
   | 'tags'
   | 'settings';
 
@@ -17,6 +18,7 @@ export interface UserProfile {
   rememberMe: boolean;
   isLoggedIn: boolean;
   theme?: 'light' | 'dark';
+  accent?: string; // AccentId from lib/theme
 }
 
 export interface DailyThought {
@@ -48,6 +50,7 @@ export interface DocumentItem {
   name: string;
   type: DocumentType;
   size: string;
+  sizeBytes?: number; // actual byte size (drives the 250 MB quota meter)
   pageCount: number;
   lastModified: string;
   tags: string[];
@@ -57,6 +60,18 @@ export interface DocumentItem {
   mimeType?: string; // Original file MIME type
   summary?: string;
   sections?: { title: string; page: number }[];
+}
+
+export type ReminderRepeat = 'none' | 'daily' | 'weekly' | 'monthly';
+
+export interface ReminderItem {
+  id: string;
+  title: string;
+  notes: string;
+  remindAt: string; // ISO timestamp
+  repeat: ReminderRepeat;
+  soundEnabled: boolean;
+  completed: boolean;
 }
 
 export interface IdeaItem {

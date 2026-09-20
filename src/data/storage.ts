@@ -6,7 +6,7 @@ import {
   initialTags,
   initialThoughts,
 } from './initialData';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, TagItem, UserProfile } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, TagItem, UserProfile } from '../types';
 
 const STORAGE_KEYS = {
   PROFILE: 'myspace_real_profile_v2',
@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   DOCUMENTS: 'myspace_real_documents_v2',
   IDEAS: 'myspace_real_ideas_v2',
   TAGS: 'myspace_real_tags_v2',
+  REMINDERS: 'folynote_reminders_v1',
   PURGED_DEMO: 'myspace_demo_purged_v2',
 };
 
@@ -139,6 +140,22 @@ export const storage = {
     }
   },
 
+  getReminders: (): ReminderItem[] => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.REMINDERS);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+  saveReminders: (reminders: ReminderItem[]): void => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.REMINDERS, JSON.stringify(reminders));
+    } catch (e) {
+      console.error('Failed to save reminders to localStorage', e);
+    }
+  },
+
   exportAllData: (): string => {
     const backup = {
       profile: storage.getProfile(),
@@ -147,6 +164,7 @@ export const storage = {
       documents: storage.getDocuments(),
       ideas: storage.getIdeas(),
       tags: storage.getTags(),
+      reminders: storage.getReminders(),
       exportedAt: new Date().toISOString(),
     };
     return JSON.stringify(backup, null, 2);
@@ -161,6 +179,7 @@ export const storage = {
       if (parsed.documents) storage.saveDocuments(parsed.documents);
       if (parsed.ideas) storage.saveIdeas(parsed.ideas);
       if (parsed.tags) storage.saveTags(parsed.tags);
+      if (parsed.reminders) storage.saveReminders(parsed.reminders);
       return true;
     } catch (e) {
       console.error('Failed to import data', e);
@@ -176,6 +195,7 @@ export const storage = {
       localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
       localStorage.removeItem(STORAGE_KEYS.IDEAS);
       localStorage.removeItem(STORAGE_KEYS.TAGS);
+      localStorage.removeItem(STORAGE_KEYS.REMINDERS);
     } catch (e) {
       console.error('Failed to reset storage', e);
     }

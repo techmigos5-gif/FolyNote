@@ -37,7 +37,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#FDFCFE] dark:bg-[#141118] text-gray-900 dark:text-gray-100 font-sans">
-        <div className="w-full max-w-md rounded-3xl border border-purple-100 dark:border-purple-900/60 bg-white dark:bg-[#1E1729] p-8 text-center shadow-xl space-y-5">
+        <div className="w-full max-w-md rounded-3xl border border-accent-100 dark:border-accent-900/60 bg-white dark:bg-[#1E1729] p-8 text-center shadow-xl space-y-5">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
             <AlertTriangle className="w-7 h-7 text-amber-500" />
           </div>
@@ -59,7 +59,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <button
               type="button"
               onClick={this.handleReset}
-              className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-sm font-bold transition cursor-pointer"
             >
               Try again
             </button>
