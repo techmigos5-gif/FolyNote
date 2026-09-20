@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        // Universal guard against "TypeError: Cannot set property fetch of #<Window> which has only a getter"
+        var origDefineProperty = Object.defineProperty;
+        var origDefineProperties = Object.defineProperties;
+
+        function makeSafeFetchDescriptor(desc) {
+          if (!desc) return desc;
+          var currentVal;
+          var origGet = desc.get;
+          var origSet = desc.set;
+          return {
+            configurable: true,
+            enumerable: desc.enumerable !== undefined ? desc.enumerable : true,
+            get: function() {
+              if (currentVal !== undefined) return currentVal;
+              return origGet ? origGet.call(this) : desc.value;
+            },
+            set: function(val) {
+              currentVal = val;
+              if (origSet) {
+                try { origSet.call(this, val); } catch (e) {}
+              }
+            }
+          };
+        }
+
+        Object.defineProperty = function(obj, prop, descriptor) {
+          if (prop === 'fetch' && descriptor && descriptor.get && !descriptor.set) {
+            try {
+              return origDefineProperty.call(this, obj, prop, makeSafeFetchDescriptor(descriptor));
+            } catch (err) {}
+          }
+          return origDefineProperty.apply(this, arguments);
+        };
+
+        if (origDefineProperties) {
+          Object.defineProperties = function(obj, props) {
+            if (props && props.fetch && props.fetch.get && !props.fetch.set) {
+              try {
+                Object.defineProperty(obj, 'fetch', props.fetch);
+                var restProps = Object.assign({}, props);
+                delete restProps.fetch;
+                return origDefineProperties.call(this, obj, restProps);
+              } catch (e) {}
+            }
+            return origDefineProperties.apply(this, arguments);
+          };
+        }
+
+        function ensureSettable(target) {
+          if (!target) return;
+          try {
+            var desc = Object.getOwnPropertyDescriptor(target, 'fetch');
+            if (desc && desc.configurable && desc.get && !desc.set) {
+              origDefineProperty.call(Object, target, 'fetch', makeSafeFetchDescriptor(desc));
+            }
+          } catch (e) {}
+        }
+        ensureSettable(window);
+        if (typeof Window !== 'undefined' && Window.prototype) ensureSettable(Window.prototype);
+        if (typeof globalThis !== 'undefined') ensureSettable(globalThis);
+
+        // Filter benign Vite websocket disconnection console logs in AI Studio preview
+        var origConsoleError = console.error;
+        console.error = function() {
+          var firstArg = arguments[0];
+          if (firstArg && (
+            (typeof firstArg === 'string' && firstArg.indexOf('[vite]') !== -1) ||
+            (firstArg.message && typeof firstArg.message === 'string' && firstArg.message.indexOf('[vite]') !== -1)
+          )) {
+            return;
+          }
+          return origConsoleError.apply(console, arguments);
+        };
+        var origConsoleWarn = console.warn;
+        console.warn = function() {
+          var firstArg = arguments[0];
+          if (firstArg && (
+            (typeof firstArg === 'string' && firstArg.indexOf('[vite]') !== -1) ||
+            (firstArg.message && typeof firstArg.message === 'string' && firstArg.message.indexOf('[vite]') !== -1)
+          )) {
+            return;
+          }
+          return origConsoleWarn.apply(console, arguments);
+        };
+        window.addEventListener('error', function(e) {
+          if (e && e.message && typeof e.message === 'string' && e.message.indexOf('[vite]') !== -1) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, true);
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>FolyNote — Your files. Your thoughts. Your space.</title>
+    <meta name="description" content="FolyNote — your files, your thoughts, your space. Daily reflections, documents, pinned notes, and ideas with offline access and multi-format viewing." />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#6C5CE7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1B1424" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="FolyNote" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <meta property="og:title" content="FolyNote — Your files. Your thoughts. Your space." />
+    <meta property="og:description" content="Your files. Your thoughts. Your space. View documents, track daily thoughts, and organize ideas offline." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-gray-50 text-gray-900 dark:bg-[#141118] dark:text-gray-100 antialiased selection:bg-purple-100 selection:text-purple-700 dark:selection:bg-purple-900 dark:selection:text-purple-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

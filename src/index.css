@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (toggled via <html class="dark">) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   Accessibility: respect prefers-reduced-motion globally.
+   Framer Motion animations are additionally softened via
+   <MotionConfig reducedMotion="user"> in main.tsx.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smooth scrolling when the user allows motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
