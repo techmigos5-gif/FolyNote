@@ -98,14 +98,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-gradient-to-br from-accent-50 via-white to-pink-50/40 dark:from-[#1b1424] dark:via-[#141118] dark:to-[#191221] overflow-hidden transition-colors duration-300">
+    <div className="h-screen w-full flex flex-col md:flex-row bg-gradient-to-br from-accent-50 via-white to-pink-50/40 dark:from-[#1b1424] dark:via-[#141118] dark:to-[#191221] overflow-hidden transition-colors duration-300">
       {/* Left side: Artwork or Uploaded Image with gentle meditative motion */}
       <motion.div
         id="login-visual-panel"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="relative w-full md:w-1/2 lg:w-7/12 h-72 md:h-screen sticky top-0 bg-[#28183d] overflow-hidden flex items-center justify-center shadow-xl md:shadow-none"
+        className="relative w-full md:w-1/2 lg:w-7/12 h-[40vh] md:h-screen sticky top-0 bg-[#28183d] overflow-hidden flex items-center justify-center shadow-xl md:shadow-none"
       >
         <motion.div
           animate={{ scale: [1, 1.025, 1] }}
@@ -159,7 +159,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       </motion.div>
 
       {/* Right side: Auth Form Card */}
-      <div className="w-full md:w-1/2 lg:w-5/12 min-h-[calc(100vh-16rem)] md:min-h-screen flex flex-col items-center justify-center px-6 py-8 sm:px-12">
+      <div className="w-full md:w-1/2 lg:w-5/12 min-h-screen md:h-screen flex flex-col items-center justify-center px-4 py-6 sm:px-8 overflow-y-auto">
         {onNavigateHome && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -189,7 +189,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="w-full max-w-md bg-white/95 dark:bg-[#221a30] backdrop-blur-sm p-8 sm:p-10 rounded-3xl shadow-xl shadow-accent-500/5 border border-accent-100/60"
+          className="w-full max-w-md bg-white/95 dark:bg-[#221a30] backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-xl shadow-accent-500/5 border border-accent-100/60"
         >
           {/* Logo Badge with smooth hover float */}
           <div className="flex justify-center mb-5">
