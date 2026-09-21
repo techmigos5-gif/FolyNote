@@ -19,6 +19,12 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    // Prevent stale browser cache in development
+    app.use((_req: Request, res: Response, next) => {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      next();
+    });
     const isHmrDisabled = process.env.DISABLE_HMR === 'true';
     const vite = await createViteServer({
       server: {
