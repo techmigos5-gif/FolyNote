@@ -9,9 +9,17 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undef
  */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
+if (!isSupabaseConfigured) {
+  console.error(
+    '[FolyNote] Supabase not configured. ' +
+    'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local, ' +
+    'then restart the dev server.',
+  );
+}
+
 export const supabase: SupabaseClient = createClient(
-  supabaseUrl ?? 'http://localhost:54321',
-  supabaseAnonKey ?? 'public-anon-key-placeholder',
+  supabaseUrl || 'http://localhost:54321',
+  supabaseAnonKey || 'public-anon-key-placeholder',
   {
     auth: {
       persistSession: true,
