@@ -57,7 +57,6 @@ beforeEach(() => {
     pinned_items: [],
     documents: [],
     ideas: [],
-    tags: [{ id: 1, name: 'Work', color: 'blue', count: 2, user_id: 'u1' }],
   };
 
   mockClient = {
@@ -126,7 +125,6 @@ describe('useWorkspaceSync', () => {
 
     const pulled = props.onServerData.mock.calls[0][0];
     expect(pulled.thoughts.some((t: DailyThought) => t.id === 'srv-1')).toBe(true);
-    expect(pulled.tags.some((t) => t.name === 'Work')).toBe(true);
   });
 
   it('ignores realtime echoes arriving right after its own write window', async () => {

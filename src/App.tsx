@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
-  BookOpen, Compass, FileText, Folder, Lightbulb, LayoutDashboard, Pin, Settings, Tag, Wind,
+  BookOpen, Compass, FileText, Folder, Lightbulb, LayoutDashboard, Pin, Settings, Wind,
 } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
@@ -11,7 +11,6 @@ import {
   NavView,
   PinnedItem,
   ReminderItem,
-  TagItem,
   UserProfile,
 } from './types';
 import { storage } from './data/storage';
@@ -21,6 +20,7 @@ import { getAuthUserId, onAuthStateChange, signOut } from './api/auth';
 import { isSupabaseConfigured } from './lib/supabase';
 import { documentsStorage } from './api/documents';
 import { checkQuota } from './lib/storageQuota';
+import { fileStore } from './lib/fileStore';
 import { toast } from './lib/toast';
 import { ACCENTS, applyAccent, isAccentId } from './lib/theme';
 import { SoundscapeId, startSoundscape, stopSoundscape, setVolume as setScapeVolume } from './lib/sounds';
@@ -39,7 +39,6 @@ import { DocumentsListView } from './views/DocumentsListView';
 import { DocumentViewerView } from './views/DocumentViewerView';
 import { IdeasView } from './views/IdeasView';
 import { RemindersView } from './views/RemindersView';
-import { TagsView } from './views/TagsView';
 import { SettingsView } from './views/SettingsView';
 
 function AppShell() {
@@ -58,7 +57,6 @@ function AppShell() {
   const [pinnedItems, setPinnedItems] = useState<PinnedItem[]>(() => storage.getPinnedItems());
   const [documents, setDocuments] = useState<DocumentItem[]>(() => storage.getDocuments());
   const [ideas, setIdeas] = useState<IdeaItem[]>(() => storage.getIdeas());
-  const [tags, setTags] = useState<TagItem[]>(() => storage.getTags());
   const [reminders, setReminders] = useState<ReminderItem[]>(() => storage.getReminders());
 
   // 2. Navigation & UI state
@@ -114,7 +112,6 @@ function AppShell() {
   useEffect(() => { storage.savePinnedItems(pinnedItems); }, [pinnedItems]);
   useEffect(() => { storage.saveDocuments(documents); }, [documents]);
   useEffect(() => { storage.saveIdeas(ideas); }, [ideas]);
-  useEffect(() => { storage.saveTags(tags); }, [tags]);
   useEffect(() => { storage.saveReminders(reminders); }, [reminders]);
 
   // 5. Theme (dark mode + accent palette) applied at the root with a
@@ -146,14 +143,12 @@ function AppShell() {
     pinnedItems,
     documents,
     ideas,
-    tags,
     reminders,
-    onServerData: useCallback(({ thoughts: t, pinnedItems: p, documents: d, ideas: i, tags: g, reminders: r }) => {
+    onServerData: useCallback(({ thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r }) => {
       setThoughts(t);
       setPinnedItems(p);
       setDocuments(d);
       setIdeas(i);
-      setTags(g);
       setReminders(r);
     }, []),
   });
@@ -246,6 +241,13 @@ function AppShell() {
         toast(quota.message || 'Storage quota exceeded', 'error');
         return;
       }
+      // Persist the original binary locally BEFORE anything else so the
+      // uploaded file is never lost (cloud or no cloud).
+      const savedLocally = await fileStore.put(newDoc.id, file);
+      if (!savedLocally) {
+        toast('Could not store the original file on this device.', 'error');
+        return;
+      }
     }
     let doc = newDoc;
     if (file && isSupabaseConfigured && authUserId) {
@@ -262,6 +264,7 @@ function AppShell() {
     if (removed?.storagePath && isSupabaseConfigured) {
       void documentsStorage.remove(removed.storagePath);
     }
+    void fileStore.remove(docId);
     setDocuments((prev) => prev.filter((d) => d.id !== docId));
     setPinnedItems((prev) => prev.filter((p) => p.targetId !== docId));
     if (activeDocId === docId) {
@@ -386,23 +389,12 @@ function AppShell() {
     setPinnedItems((prev) => [pin, ...prev]);
   };
 
-  // Tags Handlers
-  const handleAddTag = (name: string, color: string) => {
-    setTags((prev) => {
-      if (prev.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
-        return prev;
-      }
-      return [...prev, { name, color, count: 1 }];
-    });
-  };
-
   const handleReloadAllData = () => {
     setUser(storage.getProfile());
     setThoughts(storage.getThoughts());
     setPinnedItems(storage.getPinnedItems());
     setDocuments(storage.getDocuments());
     setIdeas(storage.getIdeas());
-    setTags(storage.getTags());
     setReminders(storage.getReminders());
   };
 
@@ -413,8 +405,7 @@ function AppShell() {
     { id: 'nav-ideas', label: 'Ideas', group: 'Go to', icon: <Lightbulb className="w-4 h-4" />, run: () => setCurrentView('ideas') },
     { id: 'nav-documents', label: 'Documents', group: 'Go to', icon: <Folder className="w-4 h-4" />, run: () => setCurrentView('documents') },
     { id: 'nav-pinned', label: 'Pinned Items', group: 'Go to', icon: <Pin className="w-4 h-4" />, run: () => setCurrentView('pinned-items') },
-    { id: 'nav-reminders', label: 'Reminders', group: 'Go to', icon: <Tag className="w-4 h-4" />, keywords: 'bell alarm', run: () => setCurrentView('reminders') },
-    { id: 'nav-tags', label: 'Tags', group: 'Go to', icon: <Tag className="w-4 h-4" />, run: () => setCurrentView('tags') },
+    { id: 'nav-reminders', label: 'Reminders', group: 'Go to', icon: <Wind className="w-4 h-4" />, keywords: 'bell alarm', run: () => setCurrentView('reminders') },
     { id: 'nav-settings', label: 'Settings', group: 'Go to', icon: <Settings className="w-4 h-4" />, run: () => setCurrentView('settings') },
     { id: 'act-calm', label: 'Take a calm breathing break', group: 'Actions', icon: <Wind className="w-4 h-4" />, keywords: 'breathe relax meditate', run: () => setCalmBreakOpen(true) },
     { id: 'act-ocean', label: 'Play Ocean Waves soundscape', group: 'Actions', icon: <Compass className="w-4 h-4" />, keywords: 'sound ambient focus', run: () => handlePlaySoundscape('ocean') },
@@ -578,7 +569,6 @@ function AppShell() {
               {currentView === 'ideas' && (
                 <IdeasView
                   ideas={ideas}
-                  tags={tags}
                   onAddIdea={handleAddIdea}
                   onUpdateIdea={handleUpdateIdea}
                   onDeleteIdea={handleDeleteIdea}
@@ -592,17 +582,6 @@ function AppShell() {
                   onAdd={handleAddReminder}
                   onUpdate={handleUpdateReminder}
                   onDelete={handleDeleteReminder}
-                />
-              )}
-
-              {currentView === 'tags' && (
-                <TagsView
-                  tags={tags}
-                  thoughts={thoughts}
-                  documents={documents}
-                  ideas={ideas}
-                  onOpenDocument={handleOpenDocument}
-                  onAddTag={handleAddTag}
                 />
               )}
 

@@ -299,7 +299,7 @@ export const TrustPrivacyModal: React.FC<TrustPrivacyModalProps> = ({
                 <ul className="list-disc list-inside text-xs text-gray-600 space-y-1 pl-1">
                   <li><strong>Account Identity:</strong> Mobile number (+91 format) and 6-digit access PIN for secure authentication.</li>
                   <li><strong>Workspace Profile:</strong> Display name and profile avatar letter.</li>
-                  <li><strong>User Content:</strong> Personal journal entries, thoughts, tags, pinned items, and uploaded documents/PDFs.</li>
+                  <li><strong>User Content:</strong> Personal journal entries, thoughts, pinned items, and uploaded documents/PDFs.</li>
                   <li><strong>Device Telemetry:</strong> None. We do not collect device serial numbers, GPS geolocation, advertising IDs, or contacts.</li>
                 </ul>
               </div>

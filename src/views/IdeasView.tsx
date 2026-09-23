@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IdeaItem, TagItem } from '../types';
+import { IdeaItem } from '../types';
 import { 
   Plus, 
   Search, 
@@ -15,7 +15,6 @@ import {
 
 interface IdeasViewProps {
   ideas: IdeaItem[];
-  tags: TagItem[];
   onAddIdea: (idea: IdeaItem) => void;
   onUpdateIdea: (idea: IdeaItem) => void;
   onDeleteIdea: (id: string) => void;
@@ -24,7 +23,6 @@ interface IdeasViewProps {
 
 export const IdeasView: React.FC<IdeasViewProps> = ({
   ideas,
-  tags,
   onAddIdea,
   onUpdateIdea,
   onDeleteIdea,

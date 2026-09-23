@@ -7,7 +7,6 @@ export type NavView =
   | 'document-viewer'
   | 'ideas'
   | 'reminders'
-  | 'tags'
   | 'settings';
 
 export interface UserProfile {
@@ -82,10 +81,4 @@ export interface IdeaItem {
   date: string; // e.g. "13 Aug 2025"
   isStarred?: boolean;
   isPinned?: boolean;
-}
-
-export interface TagItem {
-  name: string;
-  color: string;
-  count: number;
 }

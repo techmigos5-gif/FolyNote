@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DocumentItem } from '../types';
 import { documentsStorage } from '../api/documents';
+import { fileStore } from '../lib/fileStore';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -46,8 +47,32 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
   const [showSearch, setShowSearch] = useState(false);
   const [viewMode, setViewMode] = useState<'rendered' | 'raw' | 'print'>('rendered');
   const [copied, setCopied] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const totalPages = document.pageCount || 12;
+
+  // Resolve the original PDF binary (local IndexedDB copy first, then cloud)
+  // so the viewer shows the real file instead of the text placeholder.
+  useEffect(() => {
+    let revoked: string | null = null;
+    let cancelled = false;
+    (async () => {
+      if (document.type !== 'pdf') return;
+      let blob = await fileStore.get(document.id);
+      if (!blob && document.storagePath) {
+        blob = await documentsStorage.download(document.storagePath);
+      }
+      if (!cancelled && blob) {
+        revoked = URL.createObjectURL(blob);
+        setPdfUrl(revoked);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (revoked) URL.revokeObjectURL(revoked);
+      setPdfUrl(null);
+    };
+  }, [document.id, document.type, document.storagePath]);
 
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
@@ -99,32 +124,37 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
-    // Prefer the original uploaded binary from Supabase Storage when available
-    // (PDFs keep their real pages/annotations); otherwise export the text content.
-    if (document.storagePath) {
-      setIsDownloading(true);
-      try {
-        const blob = await documentsStorage.download(document.storagePath);
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const a = window.document.createElement('a');
-          a.href = url;
-          a.download = document.name;
-          a.click();
-          URL.revokeObjectURL(url);
+    const saveBlob = (blob: Blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = document.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Prefer the original uploaded binary: local copy first (works offline,
+    // always present after an upload), then Supabase Storage.
+    setIsDownloading(true);
+    try {
+      const local = await fileStore.get(document.id);
+      if (local) {
+        saveBlob(local);
+        return;
+      }
+      if (document.storagePath) {
+        const remote = await documentsStorage.download(document.storagePath);
+        if (remote) {
+          saveBlob(remote);
           return;
         }
-      } finally {
-        setIsDownloading(false);
       }
+    } finally {
+      setIsDownloading(false);
     }
-    const blob = new Blob([document.content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = document.name;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    // No binary available (created-in-app text docs) — export the text content.
+    saveBlob(new Blob([document.content], { type: 'text/plain;charset=utf-8' }));
   };
 
   // Slice content by pages for multi-page document experience
@@ -410,6 +440,15 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
             </div>
 
             {/* Document Body */}
+            {document.type === 'pdf' && pdfUrl ? (
+              <div className="flex-1">
+                <iframe
+                  src={pdfUrl}
+                  title={document.name}
+                  className="w-full h-[1000px] rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+              </div>
+            ) : (
             <div className="flex-1 space-y-6">
               {viewMode === 'raw' ? (
                 <pre className="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl font-mono text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap border border-gray-200 dark:border-gray-700 overflow-x-auto">
@@ -423,6 +462,7 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
                 </div>
               )}
             </div>
+            )}
 
             {/* Document Footer inside sheet */}
             <div className="border-t border-gray-100 dark:border-gray-800 pt-6 mt-12 flex items-center justify-between text-[10px] text-gray-400 select-none">

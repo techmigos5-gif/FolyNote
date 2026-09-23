@@ -3,10 +3,9 @@ import {
   initialIdeas,
   initialPinnedItems,
   initialProfile,
-  initialTags,
   initialThoughts,
 } from './initialData';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, TagItem, UserProfile } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, UserProfile } from '../types';
 
 const STORAGE_KEYS = {
   PROFILE: 'myspace_real_profile_v2',
@@ -14,7 +13,6 @@ const STORAGE_KEYS = {
   PINNED: 'myspace_real_pinned_v2',
   DOCUMENTS: 'myspace_real_documents_v2',
   IDEAS: 'myspace_real_ideas_v2',
-  TAGS: 'myspace_real_tags_v2',
   REMINDERS: 'folynote_reminders_v1',
   PURGED_DEMO: 'myspace_demo_purged_v2',
 };
@@ -29,7 +27,6 @@ function purgeLegacyDemoData(): void {
         'myspace_pinned_items_v1',
         'myspace_documents_v1',
         'myspace_ideas_v1',
-        'myspace_tags_v1',
       ];
       for (const k of oldKeys) {
         localStorage.removeItem(k);
@@ -124,22 +121,6 @@ export const storage = {
     }
   },
 
-  getTags: (): TagItem[] => {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.TAGS);
-      return data ? JSON.parse(data) : initialTags;
-    } catch {
-      return initialTags;
-    }
-  },
-  saveTags: (tags: TagItem[]): void => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags));
-    } catch (e) {
-      console.error('Failed to save tags to localStorage', e);
-    }
-  },
-
   getReminders: (): ReminderItem[] => {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.REMINDERS);
@@ -163,7 +144,6 @@ export const storage = {
       pinned: storage.getPinnedItems(),
       documents: storage.getDocuments(),
       ideas: storage.getIdeas(),
-      tags: storage.getTags(),
       reminders: storage.getReminders(),
       exportedAt: new Date().toISOString(),
     };
@@ -178,7 +158,6 @@ export const storage = {
       if (parsed.pinned) storage.savePinnedItems(parsed.pinned);
       if (parsed.documents) storage.saveDocuments(parsed.documents);
       if (parsed.ideas) storage.saveIdeas(parsed.ideas);
-      if (parsed.tags) storage.saveTags(parsed.tags);
       if (parsed.reminders) storage.saveReminders(parsed.reminders);
       return true;
     } catch (e) {
@@ -194,7 +173,6 @@ export const storage = {
       localStorage.removeItem(STORAGE_KEYS.PINNED);
       localStorage.removeItem(STORAGE_KEYS.DOCUMENTS);
       localStorage.removeItem(STORAGE_KEYS.IDEAS);
-      localStorage.removeItem(STORAGE_KEYS.TAGS);
       localStorage.removeItem(STORAGE_KEYS.REMINDERS);
     } catch (e) {
       console.error('Failed to reset storage', e);

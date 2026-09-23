@@ -4,13 +4,12 @@ import {
   documentsApi,
   ideasApi,
   pinsApi,
-  tagsApi,
   thoughtsApi,
 } from '../api/entities';
 import { remindersApi } from '../api/reminders';
 import { documentsStorage } from '../api/documents';
 import { subscribeToWorkspace, RealtimeChange } from '../api/realtime';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, TagItem } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem } from '../types';
 
 interface UseWorkspaceSyncArgs {
   userId: string | null;
@@ -18,7 +17,6 @@ interface UseWorkspaceSyncArgs {
   pinnedItems: PinnedItem[];
   documents: DocumentItem[];
   ideas: IdeaItem[];
-  tags: TagItem[];
   reminders: ReminderItem[];
   /** Replace local state with server rows (used by hydration + realtime re-pulls). */
   onServerData: (data: {
@@ -26,7 +24,6 @@ interface UseWorkspaceSyncArgs {
     pinnedItems: PinnedItem[];
     documents: DocumentItem[];
     ideas: IdeaItem[];
-    tags: TagItem[];
     reminders: ReminderItem[];
   }) => void;
 }
@@ -79,7 +76,7 @@ function mergeServerRows<T>(target: T[], incoming: T[], getKey: (x: T) => string
  * Offline/local-only mode is preserved: without Supabase env vars nothing runs.
  */
 export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResult {
-  const { userId, thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData } = args;
+  const { userId, thoughts, pinnedItems, documents, ideas, reminders, onServerData } = args;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,24 +96,22 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
     pinnedItems: PinnedItem[] | null;
     documents: DocumentItem[] | null;
     ideas: IdeaItem[] | null;
-    tags: TagItem[] | null;
     reminders: ReminderItem[] | null;
-  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null, reminders: null });
+  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null });
 
   // Latest state, readable inside stable realtime/hydration closures.
-  const latest = useRef({ thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData });
-  latest.current = { thoughts, pinnedItems, documents, ideas, tags, reminders, onServerData };
+  const latest = useRef({ thoughts, pinnedItems, documents, ideas, reminders, onServerData });
+  latest.current = { thoughts, pinnedItems, documents, ideas, reminders, onServerData };
 
   const pullAll = async () => {
-    const [t, p, d, i, g, r] = await Promise.all([
+    const [t, p, d, i, r] = await Promise.all([
       thoughtsApi.listAll(),
       pinsApi.listAll(),
       documentsApi.listAll(),
       ideasApi.listAll(),
-      tagsApi.listAll(),
       remindersApi.listAll(),
     ]);
-    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, tags: g, reminders: r };
+    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r };
   };
 
   const pullOne = async (table: RealtimeChange['table']) => {
@@ -125,7 +120,6 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       case 'pinned_items': return { pinnedItems: await pinsApi.listAll() };
       case 'documents': return { documents: await documentsApi.listAll() };
       case 'ideas': return { ideas: await ideasApi.listAll() };
-      case 'tags': return { tags: await tagsApi.listAll() };
       case 'reminders': return { reminders: await remindersApi.listAll() };
     }
   };
@@ -135,7 +129,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
   // -------------------------------------------------------------
   useEffect(() => {
     if (!enabled) {
-      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, tags: null, reminders: null };
+      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null };
       return;
     }
 
@@ -180,7 +174,6 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       pinnedItems: base.pinnedItems ? diffEntity(base.pinnedItems, pinnedItems, (p) => p.id) : null,
       documents: base.documents ? diffEntity(base.documents, documents, (d) => d.id) : null,
       ideas: base.ideas ? diffEntity(base.ideas, ideas, (i) => i.id) : null,
-      tags: base.tags ? diffEntity(base.tags, tags, (t) => t.name) : null,
       reminders: base.reminders ? diffEntity(base.reminders, reminders, (r) => r.id) : null,
     };
 
@@ -191,7 +184,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
 
     // New baseline = current state; failures are logged and retried on the
     // next mutation (state remains authoritative locally meanwhile).
-    syncBaseline.current = { thoughts, pinnedItems, documents, ideas, tags, reminders };
+    syncBaseline.current = { thoughts, pinnedItems, documents, ideas, reminders };
     markLocalWrite();
 
     const timer = setTimeout(async () => {
@@ -214,9 +207,6 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
           ...deltas.ideas.deletes.map((id) => ideasApi.remove(id)),
         ]);
       }
-      if (deltas.tags) {
-        await Promise.all(deltas.tags.upserts.map((t) => tagsApi.upsert(t, uid)));
-      }
       if (deltas.reminders) {
         await Promise.all([
           ...deltas.reminders.upserts.map((r) => remindersApi.upsert(r, uid)),
@@ -237,7 +227,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [thoughts, pinnedItems, documents, ideas, tags, reminders, enabled, userId]);
+  }, [thoughts, pinnedItems, documents, ideas, reminders, enabled, userId]);
 
   // -------------------------------------------------------------
   // Realtime: re-pull changed table when another tab/device mutates
@@ -260,7 +250,6 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
           pinnedItems: patch.pinnedItems ? mergeServerRows(cur.pinnedItems, patch.pinnedItems, (p) => p.id) : cur.pinnedItems,
           documents: patch.documents ? mergeServerRows(cur.documents, patch.documents, (d) => d.id) : cur.documents,
           ideas: patch.ideas ? mergeServerRows(cur.ideas, patch.ideas, (i) => i.id) : cur.ideas,
-          tags: patch.tags ? mergeServerRows(cur.tags, patch.tags, (t) => t.name) : cur.tags,
           reminders: patch.reminders ? mergeServerRows(cur.reminders, patch.reminders, (r) => r.id) : cur.reminders,
         };
         // Keep the push-baseline coherent with what we just applied.

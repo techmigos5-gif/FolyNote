@@ -6,7 +6,6 @@ import {
   Pin,
   Folder,
   Lightbulb,
-  Tag,
   Settings,
   LogOut,
   X,
@@ -46,7 +45,6 @@ const FILE_ITEMS: NavItem[] = [
 
 const ORGANIZE_ITEMS: NavItem[] = [
   { view: 'reminders', label: 'Reminders', icon: BellRing },
-  { view: 'tags', label: 'Tags', icon: Tag },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [

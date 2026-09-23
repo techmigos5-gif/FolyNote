@@ -25,7 +25,7 @@ This creates:
 
 | Object | Purpose |
 | --- | --- |
-| `profiles`, `thoughts`, `pinned_items`, `documents`, `ideas`, `tags` | Per-user tables |
+| `profiles`, `thoughts`, `pinned_items`, `documents`, `ideas` | Per-user tables |
 | Row Level Security policies | Every row strictly owner-scoped (`auth.uid() = user_id`) |
 | `on_auth_user_created` trigger | Auto-provisions a `profiles` row on signup |
 | `documents` Storage bucket (private, 25 MB limit) | PDFs/text/markdown/json binaries under `{userId}/` |

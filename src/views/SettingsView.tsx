@@ -416,7 +416,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </h3>
 
             <p className="text-xs text-gray-600 leading-relaxed">
-              In accordance with Section 12 of the DPDP Act 2023, this action will permanently purge all your local personal journal entries, uploaded documents, ideas, and tags from this browser and workspace. 
+              In accordance with Section 12 of the DPDP Act 2023, this action will permanently purge all your local personal journal entries, uploaded documents, and ideas from this browser and workspace. 
               <br /><br />
               <strong>Tip:</strong> You can download a backup archive first if you wish to retain a private copy.
             </p>

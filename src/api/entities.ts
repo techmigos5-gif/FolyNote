@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, TagItem } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem } from '../types';
 
 // ===============================================================
 // Thoughts
@@ -221,55 +221,6 @@ export const documentsApi = {
     const { error } = await supabase.from('documents').delete().eq('id', id);
     if (error) {
       console.warn('documents.remove failed:', error.message);
-      return false;
-    }
-    return true;
-  },
-};
-
-// ===============================================================
-// Tags
-// ===============================================================
-
-export interface TagRow {
-  id: number;
-  name: string;
-  color: string;
-  count: number;
-}
-
-function rowToTag(r: TagRow): TagItem {
-  return { name: r.name, color: r.color, count: r.count };
-}
-
-export const tagsApi = {
-  async listAll(): Promise<TagItem[]> {
-    const { data, error } = await supabase
-      .from('tags')
-      .select('*')
-      .order('name', { ascending: true });
-    if (error) throw new Error(`Load tags failed: ${error.message}`);
-    return (data ?? []).map(rowToTag);
-  },
-
-  async upsert(tag: TagItem, userId: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('tags')
-      .upsert(
-        { user_id: userId, name: tag.name, color: tag.color, count: tag.count },
-        { onConflict: 'user_id,name' },
-      );
-    if (error) {
-      console.warn('tags.upsert failed:', error.message);
-      return false;
-    }
-    return true;
-  },
-
-  async removeByName(name: string): Promise<boolean> {
-    const { error } = await supabase.from('tags').delete().eq('name', name);
-    if (error) {
-      console.warn('tags.remove failed:', error.message);
       return false;
     }
     return true;
