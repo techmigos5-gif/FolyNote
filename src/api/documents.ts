@@ -9,27 +9,23 @@ import { DocumentItem } from '../types';
 export const documentsStorage = {
   /**
    * Upload the original file and return the storage path.
-   * Returns null when no file was provided (text/markdown docs are stored inline).
+   * Throws with the server's message when the upload fails so callers can
+   * surface it — failures were previously swallowed and the file silently
+   * stayed device-only.
    */
-  async upload(file: File, docId: string, userId: string): Promise<string | null> {
-    try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `${userId}/${docId}-${safeName}`;
-      const { error } = await supabase.storage
-        .from('documents')
-        .upload(path, file, {
-          contentType: file.type || 'application/octet-stream',
-          upsert: true,
-        });
-      if (error) {
-        console.warn('storage.upload failed:', error.message);
-        return null;
-      }
-      return path;
-    } catch (err) {
-      console.warn('storage.upload threw:', err);
-      return null;
+  async upload(file: File, docId: string, userId: string): Promise<string> {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${userId}/${docId}-${safeName}`;
+    const { error } = await supabase.storage
+      .from('documents')
+      .upload(path, file, {
+        contentType: file.type || 'application/octet-stream',
+        upsert: true,
+      });
+    if (error) {
+      throw new Error(error.message);
     }
+    return path;
   },
 
   /** Download the original binary (e.g. for the native "Open PDF" action). */

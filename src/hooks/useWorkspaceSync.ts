@@ -7,9 +7,10 @@ import {
   thoughtsApi,
 } from '../api/entities';
 import { remindersApi } from '../api/reminders';
+import { tasksApi } from '../api/tasks';
 import { documentsStorage } from '../api/documents';
 import { subscribeToWorkspace, RealtimeChange } from '../api/realtime';
-import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem } from '../types';
+import { DailyThought, DocumentItem, IdeaItem, PinnedItem, ReminderItem, TaskItem } from '../types';
 
 interface UseWorkspaceSyncArgs {
   userId: string | null;
@@ -18,6 +19,7 @@ interface UseWorkspaceSyncArgs {
   documents: DocumentItem[];
   ideas: IdeaItem[];
   reminders: ReminderItem[];
+  tasks: TaskItem[];
   /** Replace local state with server rows (used by hydration + realtime re-pulls). */
   onServerData: (data: {
     thoughts: DailyThought[];
@@ -25,6 +27,7 @@ interface UseWorkspaceSyncArgs {
     documents: DocumentItem[];
     ideas: IdeaItem[];
     reminders: ReminderItem[];
+    tasks: TaskItem[];
   }) => void;
 }
 
@@ -76,7 +79,7 @@ function mergeServerRows<T>(target: T[], incoming: T[], getKey: (x: T) => string
  * Offline/local-only mode is preserved: without Supabase env vars nothing runs.
  */
 export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResult {
-  const { userId, thoughts, pinnedItems, documents, ideas, reminders, onServerData } = args;
+  const { userId, thoughts, pinnedItems, documents, ideas, reminders, tasks, onServerData } = args;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,21 +100,23 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
     documents: DocumentItem[] | null;
     ideas: IdeaItem[] | null;
     reminders: ReminderItem[] | null;
-  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null });
+    tasks: TaskItem[] | null;
+  }>({ thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null, tasks: null });
 
   // Latest state, readable inside stable realtime/hydration closures.
-  const latest = useRef({ thoughts, pinnedItems, documents, ideas, reminders, onServerData });
-  latest.current = { thoughts, pinnedItems, documents, ideas, reminders, onServerData };
+  const latest = useRef({ thoughts, pinnedItems, documents, ideas, reminders, tasks, onServerData });
+  latest.current = { thoughts, pinnedItems, documents, ideas, reminders, tasks, onServerData };
 
   const pullAll = async () => {
-    const [t, p, d, i, r] = await Promise.all([
+    const [t, p, d, i, r, k] = await Promise.all([
       thoughtsApi.listAll(),
       pinsApi.listAll(),
       documentsApi.listAll(),
       ideasApi.listAll(),
       remindersApi.listAll(),
+      tasksApi.listAll(),
     ]);
-    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r };
+    return { thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r, tasks: k };
   };
 
   const pullOne = async (table: RealtimeChange['table']) => {
@@ -121,6 +126,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
       case 'documents': return { documents: await documentsApi.listAll() };
       case 'ideas': return { ideas: await ideasApi.listAll() };
       case 'reminders': return { reminders: await remindersApi.listAll() };
+      case 'tasks': return { tasks: await tasksApi.listAll() };
     }
   };
 
@@ -129,7 +135,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
   // -------------------------------------------------------------
   useEffect(() => {
     if (!enabled) {
-      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null };
+      syncBaseline.current = { thoughts: null, pinnedItems: null, documents: null, ideas: null, reminders: null, tasks: null };
       return;
     }
 
@@ -164,30 +170,46 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
   // -------------------------------------------------------------
   // Push local mutations (diff vs. baseline) — runs after every render
   // in which any entity changed, debounced to batch bursts.
+  //
+  // Deltas are computed AT FIRE TIME against the baseline, never at
+  // schedule time: the earlier approach captured deltas per render and
+  // cleared the pending timer on cleanup while having already advanced
+  // the baseline, so all but the last change in a burst was silently
+  // dropped (uploading 3 files in a row pushed only the 3rd row).
   // -------------------------------------------------------------
   useEffect(() => {
     if (!enabled) return;
-    const base = syncBaseline.current;
-
-    const deltas = {
-      thoughts: base.thoughts ? diffEntity(base.thoughts, thoughts, (t) => t.id) : null,
-      pinnedItems: base.pinnedItems ? diffEntity(base.pinnedItems, pinnedItems, (p) => p.id) : null,
-      documents: base.documents ? diffEntity(base.documents, documents, (d) => d.id) : null,
-      ideas: base.ideas ? diffEntity(base.ideas, ideas, (i) => i.id) : null,
-      reminders: base.reminders ? diffEntity(base.reminders, reminders, (r) => r.id) : null,
-    };
-
-    const hasDelta = Object.values(deltas).some(
-      (d) => d && (d.upserts.length > 0 || d.deletes.length > 0),
-    );
-    if (!hasDelta) return;
-
-    // New baseline = current state; failures are logged and retried on the
-    // next mutation (state remains authoritative locally meanwhile).
-    syncBaseline.current = { thoughts, pinnedItems, documents, ideas, reminders };
-    markLocalWrite();
 
     const timer = setTimeout(async () => {
+      const base = syncBaseline.current;
+      const cur = latest.current;
+
+      const deltas = {
+        thoughts: base.thoughts ? diffEntity(base.thoughts, cur.thoughts, (t) => t.id) : null,
+        pinnedItems: base.pinnedItems ? diffEntity(base.pinnedItems, cur.pinnedItems, (p) => p.id) : null,
+        documents: base.documents ? diffEntity(base.documents, cur.documents, (d) => d.id) : null,
+        ideas: base.ideas ? diffEntity(base.ideas, cur.ideas, (i) => i.id) : null,
+        reminders: base.reminders ? diffEntity(base.reminders, cur.reminders, (r) => r.id) : null,
+        tasks: base.tasks ? diffEntity(base.tasks, cur.tasks, (t) => t.id) : null,
+      };
+
+      const hasDelta = Object.values(deltas).some(
+        (d) => d && (d.upserts.length > 0 || d.deletes.length > 0),
+      );
+      if (!hasDelta) return;
+
+      // New baseline = current state; failures are logged and retried on the
+      // next mutation (state remains authoritative locally meanwhile).
+      syncBaseline.current = {
+        thoughts: cur.thoughts,
+        pinnedItems: cur.pinnedItems,
+        documents: cur.documents,
+        ideas: cur.ideas,
+        reminders: cur.reminders,
+        tasks: cur.tasks,
+      };
+      markLocalWrite();
+
       const uid = userId!;
       if (deltas.thoughts) {
         await Promise.all([
@@ -213,6 +235,12 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
           ...deltas.reminders.deletes.map((id) => remindersApi.remove(id)),
         ]);
       }
+      if (deltas.tasks) {
+        await Promise.all([
+          ...deltas.tasks.upserts.map((k) => tasksApi.upsert(k, uid)),
+          ...deltas.tasks.deletes.map((id) => tasksApi.remove(id)),
+        ]);
+      }
       if (deltas.documents) {
         await Promise.all([
           ...deltas.documents.upserts.map((doc) => documentsApi.upsert(doc, uid)),
@@ -227,7 +255,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [thoughts, pinnedItems, documents, ideas, reminders, enabled, userId]);
+  }, [thoughts, pinnedItems, documents, ideas, reminders, tasks, enabled, userId]);
 
   // -------------------------------------------------------------
   // Realtime: re-pull changed table when another tab/device mutates
@@ -251,6 +279,7 @@ export function useWorkspaceSync(args: UseWorkspaceSyncArgs): WorkspaceSyncResul
           documents: patch.documents ? mergeServerRows(cur.documents, patch.documents, (d) => d.id) : cur.documents,
           ideas: patch.ideas ? mergeServerRows(cur.ideas, patch.ideas, (i) => i.id) : cur.ideas,
           reminders: patch.reminders ? mergeServerRows(cur.reminders, patch.reminders, (r) => r.id) : cur.reminders,
+          tasks: patch.tasks ? mergeServerRows(cur.tasks, patch.tasks, (t) => t.id) : cur.tasks,
         };
         // Keep the push-baseline coherent with what we just applied.
         syncBaseline.current = { ...syncBaseline.current, ...patch };

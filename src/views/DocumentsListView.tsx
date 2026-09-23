@@ -71,48 +71,61 @@ export const DocumentsListView: React.FC<DocumentsListViewProps> = ({
     else if (extension === 'md' || extension === 'markdown') type = 'markdown';
     else if (extension === 'json' || extension === 'ts' || extension === 'js') type = 'json';
     else if (extension === 'txt') type = 'txt';
+    else if (/^(png|jpe?g|gif|webp|svg|avif|bmp|ico)$/.test(extension) || file.type.startsWith('image/')) type = 'image';
 
-    const reader = new FileReader();
+    // Only genuinely text-based formats are read as text. Binaries (pdf,
+    // images, office docs) get a metadata placeholder — reading them as
+    // UTF-8 produced garbage content in the preview.
+    const isTextBased = type === 'markdown' || type === 'txt' || type === 'json';
 
-    if (type === 'pdf') {
-      // Read text or store blob
-      reader.onload = (event) => {
-        const textResult = event.target?.result as string;
-        const newDoc: DocumentItem = {
-          id: `doc-${Date.now()}`,
-          name: file.name,
-          type: 'pdf',
-          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          sizeBytes: file.size,
-          pageCount: 5,
-          lastModified: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-          tags: ['Uploaded', 'PDF'],
-          content: `# ${file.name}\n\nPDF document uploaded into FolyNote offline storage.\n\n### Document Properties\n- File Name: ${file.name}\n- File Size: ${(file.size / 1024).toFixed(0)} KB\n- MIME Type: ${file.type || 'application/pdf'}\n- Offline Cached: Yes`,
-          summary: `Uploaded PDF document: ${file.name}`,
-        };
-        onUploadDocument(newDoc, file);
-        showSuccess(`Uploaded "${file.name}" to offline storage!`);
+    const sizeLabel =
+      file.size >= 1024 * 1024
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        : file.size >= 1024
+        ? `${(file.size / 1024).toFixed(0)} KB`
+        : `${file.size} B`;
+
+    const finish = (content: string) => {
+      const newDoc: DocumentItem = {
+        id: `doc-${Date.now()}`,
+        name: file.name,
+        type,
+        size: sizeLabel,
+        sizeBytes: file.size,
+        pageCount: isTextBased ? Math.max(1, Math.ceil(content.length / 1800)) : 1,
+        lastModified: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        tags: ['Uploaded', type.toUpperCase()],
+        content,
+        mimeType: file.type || undefined,
+        summary:
+          type === 'image'
+            ? `Image uploaded: ${file.name}`
+            : type === 'pdf'
+            ? `Uploaded PDF document: ${file.name}`
+            : `Uploaded ${type.toUpperCase()} document: ${file.name}`,
       };
-      reader.readAsText(file.slice(0, 10000));
-    } else {
+      onUploadDocument(newDoc, file);
+      showSuccess(`Uploaded "${file.name}"!`);
+    };
+
+    if (isTextBased) {
+      const reader = new FileReader();
       reader.onload = (event) => {
-        const content = (event.target?.result as string) || `# ${file.name}\n\nEmpty file`;
-        const newDoc: DocumentItem = {
-          id: `doc-${Date.now()}`,
-          name: file.name,
-          type: type,
-          size: `${(file.size / 1024).toFixed(0)} KB`,
-          sizeBytes: file.size,
-          pageCount: Math.max(1, Math.ceil(content.length / 1800)),
-          lastModified: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-          tags: ['Uploaded', type.toUpperCase()],
-          content: content,
-          summary: `Uploaded ${type.toUpperCase()} document: ${file.name}`,
-        };
-        onUploadDocument(newDoc, file);
-        showSuccess(`Uploaded "${file.name}" to offline storage!`);
+        finish((event.target?.result as string) || `# ${file.name}\n\nEmpty file`);
       };
+      reader.onerror = () => finish(`# ${file.name}\n
+Could not read this file's text content.`);
       reader.readAsText(file);
+    } else {
+      finish(
+        `# ${file.name}\n\n` +
+          `**${type.toUpperCase()} file** stored in your private FolyNote space.\n\n` +
+          `- File name: ${file.name}\n` +
+          `- File size: ${sizeLabel}\n` +
+          `- MIME type: ${file.type || 'unknown'}\n` +
+          `- Offline cached: yes\n\n` +
+          `Use the **Download** button in the viewer to open the original file.`,
+      );
     }
   };
 
@@ -153,14 +166,13 @@ export const DocumentsListView: React.FC<DocumentsListViewProps> = ({
         >
           <Upload className="w-4 h-4" />
           <span>Upload File</span>
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".pdf,.md,.markdown,.doc,.docx,.txt,.json"
-          className="hidden"
-        />
+        </button>          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".pdf,.md,.markdown,.doc,.docx,.txt,.json,.png,.jpg,.jpeg,.gif,.webp,.svg"
+            className="hidden"
+          />
       </div>
 
       {/* Upload Success Alert */}
@@ -197,7 +209,7 @@ export const DocumentsListView: React.FC<DocumentsListViewProps> = ({
             Click to upload or drag and drop any file
           </p>
           <p className="text-[11px] text-gray-400 mt-0.5">
-            Supports PDF, Markdown (.md), DOC, Text, JSON • Cached offline on your device
+            PDF, Markdown, DOC, Text, JSON, Images • 25 MB per file, 250 MB total
           </p>
         </div>
       </div>
@@ -250,6 +262,15 @@ export const DocumentsListView: React.FC<DocumentsListViewProps> = ({
           filteredDocuments.map((doc) => {
             const isPdf = doc.type === 'pdf';
             const isMd = doc.type === 'markdown';
+            const isImg = doc.type === 'image';
+            const badge = isPdf ? 'PDF' : isMd ? 'MD' : isImg ? 'IMG' : 'DOC';
+            const badgeClass = isPdf
+              ? 'bg-red-500 text-white'
+              : isMd
+              ? 'bg-accent-600 text-white'
+              : isImg
+              ? 'bg-pink-500 text-white'
+              : 'bg-blue-600 text-white';
 
             return (
               <div
@@ -261,15 +282,9 @@ export const DocumentsListView: React.FC<DocumentsListViewProps> = ({
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shadow-2xs ${
-                          isPdf
-                            ? 'bg-red-500 text-white'
-                            : isMd
-                            ? 'bg-accent-600 text-white'
-                            : 'bg-blue-600 text-white'
-                        }`}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shadow-2xs ${badgeClass}`}
                       >
-                        {isPdf ? 'PDF' : isMd ? 'MD' : 'DOC'}
+                        {badge}
                       </div>
                       <div className="min-w-0">
                         <span className="text-[10px] font-mono text-gray-400 block">

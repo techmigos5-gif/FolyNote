@@ -48,29 +48,45 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
   const [viewMode, setViewMode] = useState<'rendered' | 'raw' | 'print'>('rendered');
   const [copied, setCopied] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [binaryFailed, setBinaryFailed] = useState(false);
 
   const totalPages = document.pageCount || 12;
 
-  // Resolve the original PDF binary (local IndexedDB copy first, then cloud)
-  // so the viewer shows the real file instead of the text placeholder.
+  // Resolve the original binary (local IndexedDB copy first, then cloud)
+  // so the viewer shows the real file instead of a text placeholder.
   useEffect(() => {
-    let revoked: string | null = null;
+    let revokedPdf: string | null = null;
+    let revokedImg: string | null = null;
     let cancelled = false;
     (async () => {
-      if (document.type !== 'pdf') return;
+      if (document.type !== 'pdf' && document.type !== 'image') return;
+      setBinaryFailed(false);
       let blob = await fileStore.get(document.id);
       if (!blob && document.storagePath) {
         blob = await documentsStorage.download(document.storagePath);
       }
-      if (!cancelled && blob) {
-        revoked = URL.createObjectURL(blob);
-        setPdfUrl(revoked);
+      if (cancelled) return;
+      if (!blob) {
+        setBinaryFailed(true);
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      if (document.type === 'pdf') {
+        revokedPdf = url;
+        setPdfUrl(url);
+      } else {
+        revokedImg = url;
+        setImageUrl(url);
       }
     })();
     return () => {
       cancelled = true;
-      if (revoked) URL.revokeObjectURL(revoked);
+      if (revokedPdf) URL.revokeObjectURL(revokedPdf);
+      if (revokedImg) URL.revokeObjectURL(revokedImg);
       setPdfUrl(null);
+      setImageUrl(null);
+      setBinaryFailed(false);
     };
   }, [document.id, document.type, document.storagePath]);
 
@@ -157,20 +173,16 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
     saveBlob(new Blob([document.content], { type: 'text/plain;charset=utf-8' }));
   };
 
-  // Slice content by pages for multi-page document experience
+  // Slice content by pages for multi-page document experience.
+  // Pages are built from the REAL content — earlier versions fabricated
+  // filler text for pages beyond the first.
   const getPageContent = (page: number) => {
-    if (page === 1) {
-      return document.content;
-    }
-
-    const sections = document.sections || [];
-    const matchedSection = sections.find((s) => s.page === page);
-
-    if (matchedSection) {
-      return `### Section: ${matchedSection.title} (Page ${page})\n\nContinuing detailed architectural specifications, data models, and implementation guidelines for **${document.name}**.\n\n- Real-time updates with sub-millisecond local latency\n- Cryptographic signatures for offline record logs\n- Deterministic schema validation`;
-    }
-
-    return `### Page ${page} — ${document.name}\n\nSupplementary documentation, parameter definitions, and security guidelines.\n\n- Data retention policies: 7 years\n- Compression algorithm: Zstandard / Gzip\n- Network status: Fully cached on client PWA storage`;
+    const CHARS_PER_PAGE = 1800;
+    const content = document.content || '';
+    if (content.length <= CHARS_PER_PAGE) return content || '_This document has no text content._';
+    const start = (page - 1) * CHARS_PER_PAGE;
+    const slice = content.slice(start, start + CHARS_PER_PAGE);
+    return slice || '_End of document._';
   };
 
   return (
@@ -447,6 +459,37 @@ export const DocumentViewerView: React.FC<DocumentViewerViewProps> = ({
                   title={document.name}
                   className="w-full h-[1000px] rounded-lg border border-gray-200 dark:border-gray-700"
                 />
+              </div>
+            ) : document.type === 'image' && imageUrl ? (
+              <div className="flex-1 flex items-start justify-center">
+                <img
+                  src={imageUrl}
+                  alt={document.name}
+                  className="max-w-full max-h-[800px] rounded-lg border border-gray-200 dark:border-gray-700 object-contain"
+                />
+              </div>
+            ) : binaryFailed ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-16">
+                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-gray-400" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                    Preview isn&apos;t available for this file here
+                  </p>
+                  <p className="text-xs text-gray-500 max-w-sm">
+                    The original {document.mimeType || document.type.toUpperCase()} file is safely stored.
+                    Download it to open with your device&apos;s apps.
+                  </p>
+                </div>
+                <button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-600 hover:bg-accent-700 text-white text-xs font-bold shadow-md shadow-accent-600/20 transition disabled:opacity-50 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  Download Original File
+                </button>
               </div>
             ) : (
             <div className="flex-1 space-y-6">

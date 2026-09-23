@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
-  BookOpen, Compass, FileText, Folder, Lightbulb, LayoutDashboard, Pin, Settings, Wind,
+  BookOpen, Compass, FileText, Folder, Lightbulb, ListTodo, LayoutDashboard, Pin, Settings, Wind,
 } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
@@ -11,6 +11,7 @@ import {
   NavView,
   PinnedItem,
   ReminderItem,
+  TaskItem,
   UserProfile,
 } from './types';
 import { storage } from './data/storage';
@@ -39,6 +40,7 @@ import { DocumentsListView } from './views/DocumentsListView';
 import { DocumentViewerView } from './views/DocumentViewerView';
 import { IdeasView } from './views/IdeasView';
 import { RemindersView } from './views/RemindersView';
+import { TasksView } from './views/TasksView';
 import { SettingsView } from './views/SettingsView';
 
 function AppShell() {
@@ -58,6 +60,7 @@ function AppShell() {
   const [documents, setDocuments] = useState<DocumentItem[]>(() => storage.getDocuments());
   const [ideas, setIdeas] = useState<IdeaItem[]>(() => storage.getIdeas());
   const [reminders, setReminders] = useState<ReminderItem[]>(() => storage.getReminders());
+  const [tasks, setTasks] = useState<TaskItem[]>(() => storage.getTasks());
 
   // 2. Navigation & UI state
   const [currentView, setCurrentView] = useState<NavView>('dashboard');
@@ -113,6 +116,7 @@ function AppShell() {
   useEffect(() => { storage.saveDocuments(documents); }, [documents]);
   useEffect(() => { storage.saveIdeas(ideas); }, [ideas]);
   useEffect(() => { storage.saveReminders(reminders); }, [reminders]);
+  useEffect(() => { storage.saveTasks(tasks); }, [tasks]);
 
   // 5. Theme (dark mode + accent palette) applied at the root with a
   //    short cross-fade so switches feel buttery instead of snapping.
@@ -144,12 +148,14 @@ function AppShell() {
     documents,
     ideas,
     reminders,
-    onServerData: useCallback(({ thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r }) => {
+    tasks,
+    onServerData: useCallback(({ thoughts: t, pinnedItems: p, documents: d, ideas: i, reminders: r, tasks: k }) => {
       setThoughts(t);
       setPinnedItems(p);
       setDocuments(d);
       setIdeas(i);
       setReminders(r);
+      setTasks(k);
     }, []),
   });
 
@@ -212,6 +218,30 @@ function AppShell() {
     setReminders((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // Tasks Handlers (board columns: backlog / active / done)
+  const handleAddTask = (task: TaskItem) => {
+    setTasks((prev) => [task, ...prev]);
+  };
+
+  const handleUpdateTask = (updated: TaskItem) => {
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  };
+
+  const handleDeleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  /** Quick-ship from the dashboard mini-board: same lane move as TasksView. */
+  const handleShipTask = (task: TaskItem) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === task.id
+          ? { ...t, column: 'done' as const, completedAt: new Date().toISOString() }
+          : t,
+      ),
+    );
+  };
+
   // Soundscape Handlers
   const handlePlaySoundscape = (id: SoundscapeId) => {
     startSoundscape(id, soundscapeVolume);
@@ -251,9 +281,12 @@ function AppShell() {
     }
     let doc = newDoc;
     if (file && isSupabaseConfigured && authUserId) {
-      const storagePath = await documentsStorage.upload(file, newDoc.id, authUserId);
-      if (storagePath) {
+      try {
+        const storagePath = await documentsStorage.upload(file, newDoc.id, authUserId);
         doc = { ...newDoc, storagePath, mimeType: file.type || undefined };
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : 'unknown error';
+        toast(`Cloud upload failed (${reason}). File is kept safe on this device.`, 'error');
       }
     }
     setDocuments((prev) => [doc, ...prev]);
@@ -396,6 +429,7 @@ function AppShell() {
     setDocuments(storage.getDocuments());
     setIdeas(storage.getIdeas());
     setReminders(storage.getReminders());
+    setTasks(storage.getTasks());
   };
 
   // Command palette items (workspace navigation + quick actions)
@@ -406,6 +440,7 @@ function AppShell() {
     { id: 'nav-documents', label: 'Documents', group: 'Go to', icon: <Folder className="w-4 h-4" />, run: () => setCurrentView('documents') },
     { id: 'nav-pinned', label: 'Pinned Items', group: 'Go to', icon: <Pin className="w-4 h-4" />, run: () => setCurrentView('pinned-items') },
     { id: 'nav-reminders', label: 'Reminders', group: 'Go to', icon: <Wind className="w-4 h-4" />, keywords: 'bell alarm', run: () => setCurrentView('reminders') },
+    { id: 'nav-tasks', label: 'Tasks Board', group: 'Go to', icon: <ListTodo className="w-4 h-4" />, keywords: 'todo task quest board', run: () => setCurrentView('tasks') },
     { id: 'nav-settings', label: 'Settings', group: 'Go to', icon: <Settings className="w-4 h-4" />, run: () => setCurrentView('settings') },
     { id: 'act-calm', label: 'Take a calm breathing break', group: 'Actions', icon: <Wind className="w-4 h-4" />, keywords: 'breathe relax meditate', run: () => setCalmBreakOpen(true) },
     { id: 'act-ocean', label: 'Play Ocean Waves soundscape', group: 'Actions', icon: <Compass className="w-4 h-4" />, keywords: 'sound ambient focus', run: () => handlePlaySoundscape('ocean') },
@@ -510,6 +545,8 @@ function AppShell() {
                   documents={documents}
                   ideas={ideas}
                   reminders={reminders}
+                  tasks={tasks}
+                  onShipTask={handleShipTask}
                   onNavigate={setCurrentView}
                   onOpenDocument={handleOpenDocument}
                   onSelectThought={(date) => {
@@ -582,6 +619,15 @@ function AppShell() {
                   onAdd={handleAddReminder}
                   onUpdate={handleUpdateReminder}
                   onDelete={handleDeleteReminder}
+                />
+              )}
+
+              {currentView === 'tasks' && (
+                <TasksView
+                  tasks={tasks}
+                  onAdd={handleAddTask}
+                  onUpdate={handleUpdateTask}
+                  onDelete={handleDeleteTask}
                 />
               )}
 

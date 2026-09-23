@@ -7,6 +7,7 @@ export type NavView =
   | 'document-viewer'
   | 'ideas'
   | 'reminders'
+  | 'tasks'
   | 'settings';
 
 export interface UserProfile {
@@ -42,7 +43,7 @@ export interface PinnedItem {
   targetId?: string;
 }
 
-export type DocumentType = 'pdf' | 'markdown' | 'doc' | 'txt' | 'json';
+export type DocumentType = 'pdf' | 'markdown' | 'doc' | 'txt' | 'json' | 'image';
 
 export interface DocumentItem {
   id: string;
@@ -71,6 +72,20 @@ export interface ReminderItem {
   repeat: ReminderRepeat;
   soundEnabled: boolean;
   completed: boolean;
+}
+
+export type TaskColumn = 'backlog' | 'active' | 'done';
+export type TaskPriority = 'low' | 'medium' | 'high';
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  notes: string;
+  column: TaskColumn;
+  priority: TaskPriority;
+  dueDate?: string; // YYYY-MM-DD (optional gentle deadline)
+  completedAt?: string | null; // ISO timestamp when moved to done
+  createdAt: string; // ISO timestamp
 }
 
 export interface IdeaItem {

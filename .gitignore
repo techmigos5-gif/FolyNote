@@ -17,3 +17,6 @@ ios/DerivedData/
 *.log
 .env*
 !.env.example
+
+.vercel
+.env*

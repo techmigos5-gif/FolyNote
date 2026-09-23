@@ -12,7 +12,8 @@ import {
   Compass,
   Sparkles,
   ShieldCheck,
-  BellRing
+  BellRing,
+  ListTodo
 } from 'lucide-react';
 import { TrustPrivacyModal } from './TrustPrivacyModal';
 
@@ -44,6 +45,7 @@ const FILE_ITEMS: NavItem[] = [
 ];
 
 const ORGANIZE_ITEMS: NavItem[] = [
+  { view: 'tasks', label: 'Tasks', icon: ListTodo },
   { view: 'reminders', label: 'Reminders', icon: BellRing },
 ];
 

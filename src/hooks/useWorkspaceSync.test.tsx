@@ -147,10 +147,20 @@ describe('useWorkspaceSync', () => {
 
   it('re-pulls the changed table on external realtime events', async () => {
     const props = makeProps();
-    renderHook(() => useWorkspaceSync(props as any));
+    // Mirror the real App: apply pulled rows back into props so local state
+    // converges with the sync baseline (otherwise the push diff would read
+    // server-only rows as local deletions).
+    const { rerender } = renderHook((p: any) => useWorkspaceSync(p), {
+      initialProps: props,
+    });
 
     await waitFor(() => {
       expect(props.onServerData).toHaveBeenCalledTimes(1);
+    });
+    // Keep the SAME onServerData mock so call counts stay observable.
+    rerender({
+      ...makeProps({ thoughts: props.onServerData.mock.calls[0][0].thoughts }),
+      onServerData: props.onServerData,
     });
 
     // Give the hydration guard window time to expire.
